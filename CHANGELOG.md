@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 This project uses [Calendar Versioning](https://calver.org/) (`YYYY.MM.DD.TS`).
 
 
+## v2026.03.14.4
+
+- Add `docs/superpowers/` to `.gitignore` per ADR-0021 (#15)
+
 ## v2026.03.14.3
 
 - Add acceptance criteria gate to CLAUDE.md PR Workflow (ADR-0017) (#11)
