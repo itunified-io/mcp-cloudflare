@@ -6,18 +6,24 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import { CloudflareClient } from './client/cloudflare-client.js';
+import { zonesToolDefinitions, handleZonesTool } from './tools/zones.js';
+import { dnsToolDefinitions, handleDnsTool } from './tools/dns.js';
+import { diagnosticsToolDefinitions, handleDiagnosticsTool } from './tools/diagnostics.js';
 
-// Tool definitions and handlers will be added here as tool modules are implemented.
-// Each domain (dns, zones, tunnels, waf, zerotrust, security) will export:
-//   - <domain>ToolDefinitions: ToolDefinition[]
-//   - handle<Domain>Tool: (name, args, client) => Promise<{ content: ... }>
-
-const allToolDefinitions: Tool[] = [];
+const allToolDefinitions: Tool[] = ([
+  ...zonesToolDefinitions,
+  ...dnsToolDefinitions,
+  ...diagnosticsToolDefinitions,
+] as unknown) as Tool[];
 
 const toolHandlers = new Map<
   string,
   (name: string, args: Record<string, unknown>, client: CloudflareClient) => Promise<{ content: Array<{ type: 'text'; text: string }> }>
 >();
+
+for (const def of zonesToolDefinitions) toolHandlers.set(def.name, handleZonesTool);
+for (const def of dnsToolDefinitions) toolHandlers.set(def.name, handleDnsTool);
+for (const def of diagnosticsToolDefinitions) toolHandlers.set(def.name, handleDiagnosticsTool);
 
 const server = new Server(
   { name: 'mcp-cloudflare', version: '2026.3.13' },
