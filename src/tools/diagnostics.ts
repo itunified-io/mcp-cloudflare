@@ -76,8 +76,20 @@ export async function handleDiagnosticsTool(
       }
 
       case "cloudflare_token_verify": {
-        const result = await client.get("/user/tokens/verify");
-        return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
+        try {
+          const result = await client.get("/user/tokens/verify");
+          return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
+        } catch {
+          // Account-level API tokens cannot self-verify via /user/tokens/verify.
+          // Fall back to a lightweight zones call to confirm the token works.
+          const zones = await client.get<{ result: unknown[] }>("/zones", { per_page: 1 });
+          const verified = {
+            status: "active",
+            message: "Token verified via fallback (account-level tokens cannot use /user/tokens/verify)",
+            zones_accessible: Array.isArray(zones) ? zones.length : 1,
+          };
+          return { content: [{ type: "text", text: JSON.stringify(verified, null, 2) }] };
+        }
       }
 
       case "cloudflare_zone_health": {

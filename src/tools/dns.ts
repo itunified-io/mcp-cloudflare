@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { CloudflareClient } from "../client/cloudflare-client.js";
+import type { DnsRecord } from "../client/types.js";
 import { ZoneNameOrIdSchema, RecordIdSchema, DnsRecordTypeSchema, TtlSchema } from "../utils/validation.js";
 
 // ---------------------------------------------------------------------------
@@ -351,10 +352,16 @@ export async function handleDnsTool(
       case "cloudflare_dns_search": {
         const parsed = DnsSearchSchema.parse(args);
         const zoneId = await client.resolveZoneId(parsed.zone_id);
-        const params: Record<string, unknown> = { name: parsed.name };
+        // Fetch all records and filter client-side for partial name match,
+        // since the CF API name param requires exact FQDN match.
+        const params: Record<string, unknown> = { per_page: 5000 };
         if (parsed.type !== undefined) params["type"] = parsed.type;
-        const result = await client.get(`/zones/${zoneId}/dns_records`, params);
-        return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
+        const allRecords = await client.get<DnsRecord[]>(`/zones/${zoneId}/dns_records`, params);
+        const searchTerm = parsed.name.toLowerCase();
+        const filtered = (Array.isArray(allRecords) ? allRecords : []).filter(
+          (r: DnsRecord) => r.name.toLowerCase().includes(searchTerm),
+        );
+        return { content: [{ type: "text", text: JSON.stringify(filtered, null, 2) }] };
       }
 
       case "cloudflare_dns_export": {
