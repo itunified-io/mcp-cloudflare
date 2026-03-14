@@ -9,11 +9,19 @@ import { CloudflareClient } from './client/cloudflare-client.js';
 import { zonesToolDefinitions, handleZonesTool } from './tools/zones.js';
 import { dnsToolDefinitions, handleDnsTool } from './tools/dns.js';
 import { diagnosticsToolDefinitions, handleDiagnosticsTool } from './tools/diagnostics.js';
+import { tunnelsToolDefinitions, handleTunnelsTool } from './tools/tunnels.js';
+import { wafToolDefinitions, handleWafTool } from './tools/waf.js';
+import { zerotrustToolDefinitions, handleZerotrustTool } from './tools/zerotrust.js';
+import { securityToolDefinitions, handleSecurityTool } from './tools/security.js';
 
 const allToolDefinitions: Tool[] = ([
   ...zonesToolDefinitions,
   ...dnsToolDefinitions,
   ...diagnosticsToolDefinitions,
+  ...tunnelsToolDefinitions,
+  ...wafToolDefinitions,
+  ...zerotrustToolDefinitions,
+  ...securityToolDefinitions,
 ] as unknown) as Tool[];
 
 const toolHandlers = new Map<
@@ -24,6 +32,10 @@ const toolHandlers = new Map<
 for (const def of zonesToolDefinitions) toolHandlers.set(def.name, handleZonesTool);
 for (const def of dnsToolDefinitions) toolHandlers.set(def.name, handleDnsTool);
 for (const def of diagnosticsToolDefinitions) toolHandlers.set(def.name, handleDiagnosticsTool);
+for (const def of tunnelsToolDefinitions) toolHandlers.set(def.name, handleTunnelsTool);
+for (const def of wafToolDefinitions) toolHandlers.set(def.name, handleWafTool);
+for (const def of zerotrustToolDefinitions) toolHandlers.set(def.name, handleZerotrustTool);
+for (const def of securityToolDefinitions) toolHandlers.set(def.name, handleSecurityTool);
 
 const server = new Server(
   { name: 'mcp-cloudflare', version: '2026.3.13' },

@@ -148,6 +148,10 @@ export class CloudflareClient {
    * If `nameOrId` is a 32-character hex string, it is treated as an ID and returned as-is.
    * Otherwise, the zone name is looked up via the Cloudflare API.
    */
+  getAccountId(): string | undefined {
+    return this.config.accountId;
+  }
+
   async resolveZoneId(nameOrId: string): Promise<string> {
     if (/^[0-9a-f]{32}$/i.test(nameOrId)) {
       return nameOrId;
