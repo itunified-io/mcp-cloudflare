@@ -30,3 +30,6 @@ yarn-error.log*
 
 # Test output
 test-results/
+
+# Superpowers plugin working artifacts (ADR-0021)
+docs/superpowers/
