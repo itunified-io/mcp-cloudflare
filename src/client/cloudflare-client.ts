@@ -1,6 +1,6 @@
 import axios, { type AxiosInstance } from "axios";
 import type { CloudflareConfig, CloudflareResponse, Zone } from "./types.js";
-import { extractError } from "../utils/errors.js";
+import { CloudflareApiError, extractError } from "../utils/errors.js";
 
 const CF_BASE_URL = "https://api.cloudflare.com/client/v4";
 
@@ -80,7 +80,7 @@ export class CloudflareClient {
       );
       if (response.data.errors && response.data.errors.length > 0) {
         const msg = response.data.errors.map((e) => e.message).join("; ");
-        throw new Error(`GraphQL error: ${msg}`);
+        throw new CloudflareApiError(`GraphQL error: ${msg}`, "POST /graphql");
       }
       return response.data.data;
     } catch (error: unknown) {
@@ -98,13 +98,9 @@ export class CloudflareClient {
       return nameOrId;
     }
     // Look up by zone name
-    const zones = await this.http.get<CloudflareResponse<Zone[]>>("/zones", {
-      params: { name: nameOrId, per_page: 1 },
-    });
-    this.assertSuccess(zones.data, "GET /zones");
-    const results = zones.data.result;
+    const results = await this.get<Zone[]>("/zones", { name: nameOrId, per_page: 1 });
     if (!results || results.length === 0) {
-      throw new Error(`Zone not found: ${nameOrId}`);
+      throw new CloudflareApiError(`Zone not found: ${nameOrId}`, "GET /zones");
     }
     return results[0].id;
   }
@@ -114,7 +110,13 @@ export class CloudflareClient {
       const firstError = response.errors[0];
       const code = firstError?.code ?? 0;
       const msg = firstError?.message ?? "Unknown Cloudflare API error";
-      throw new Error(`Cloudflare API error [${code}] at ${endpoint}: ${msg}`);
+      throw new CloudflareApiError(
+        `Cloudflare API error [${code}] at ${endpoint}: ${msg}`,
+        endpoint,
+        undefined,
+        code,
+        response.errors.length > 1 ? JSON.stringify(response.errors) : undefined,
+      );
     }
   }
 
@@ -126,7 +128,8 @@ export class CloudflareClient {
     }
 
     const accountId = process.env["CLOUDFLARE_ACCOUNT_ID"];
-    const timeout = parseInt(process.env["CLOUDFLARE_TIMEOUT"] ?? "30000", 10);
+    const rawTimeout = parseInt(process.env["CLOUDFLARE_TIMEOUT"] ?? "30000", 10);
+    const timeout = Number.isNaN(rawTimeout) ? 30000 : rawTimeout;
 
     return new CloudflareClient({ apiToken, accountId, timeout });
   }

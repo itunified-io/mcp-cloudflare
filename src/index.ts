@@ -4,6 +4,7 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
+import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import { CloudflareClient } from './client/cloudflare-client.js';
 
 // Tool definitions and handlers will be added here as tool modules are implemented.
@@ -11,7 +12,7 @@ import { CloudflareClient } from './client/cloudflare-client.js';
 //   - <domain>ToolDefinitions: ToolDefinition[]
 //   - handle<Domain>Tool: (name, args, client) => Promise<{ content: ... }>
 
-const allToolDefinitions: never[] = [];
+const allToolDefinitions: Tool[] = [];
 
 const toolHandlers = new Map<
   string,
