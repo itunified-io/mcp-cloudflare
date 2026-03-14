@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 This project uses [Calendar Versioning](https://calver.org/) (`YYYY.MM.DD.TS`).
 
 
+## v2026.03.14.2
+
+- Clarify license: internal/commercial use requires commercial license (#9)
+
 ## v2026.03.14.1
 
 - 42 tools across 7 domains: Zones (4), DNS (9), Diagnostics (4), Tunnels (6), WAF (5), Zero Trust (6), Security & DDoS (8) (#1)
