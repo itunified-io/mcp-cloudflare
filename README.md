@@ -95,9 +95,18 @@ Tools documentation is coming in v1 as tool modules are implemented. See [docs/a
 
 ## Skills
 
-Claude Code skills orchestrate multiple MCP tools into higher-level workflows. Skills are located in `.claude/skills/` and auto-discovered by Claude Code.
+Claude Code skills compose MCP tools into higher-level workflows. See [`.claude/skills/README.md`](.claude/skills/README.md) for detailed documentation.
 
-Skills documentation is coming in v1 as skill modules are implemented.
+| Skill | Slash Command | Description |
+|-------|--------------|-------------|
+| cloudflare-health | `/cf-health` | Zone health dashboard — DNS, security, tunnels, WAF, DDoS status |
+| cloudflare-live-test | `/cf-test` | Live integration test — read + safe writes with cleanup |
+| cloudflare-dns-management | — | DNS record management — add, list, update, delete across zones |
+| cloudflare-incident-response | — | DDoS/attack emergency response — detect, assess, mitigate, monitor |
+| cloudflare-security-audit | — | Security posture audit — WAF, events, IP access, DDoS analytics |
+| cloudflare-tunnel-management | — | Tunnel management — create, configure ingress, monitor connections |
+| cloudflare-waf-management | — | WAF management — custom rules, rulesets, IP access, Under Attack |
+| cloudflare-zero-trust | — | Zero Trust — access apps, policies, identity providers, gateway |
 
 ## Development
 
