@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.
 This project uses [Calendar Versioning](https://calver.org/) (`YYYY.MM.DD.TS`).
 
 
+## v2026.03.15.1
+
+- **Add Workers KV tools** (7 tools) (#27)
+  - `cloudflare_kv_namespace_list`, `cloudflare_kv_namespace_create`, `cloudflare_kv_namespace_delete`
+  - `cloudflare_kv_list_keys`, `cloudflare_kv_read`, `cloudflare_kv_write`, `cloudflare_kv_delete`
+  - Client: add `putRaw()` method for raw body PUT requests
+- **Add Workers Scripts tools** (5 tools) (#28)
+  - `cloudflare_worker_list`, `cloudflare_worker_deploy`, `cloudflare_worker_delete`
+  - `cloudflare_worker_route_list`, `cloudflare_worker_route_create`
+  - Client: add `putForm()` method for multipart PUT requests
+- **Add Worker Secrets tools** (3 tools) (#29)
+  - `cloudflare_worker_secret_list`, `cloudflare_worker_secret_set`, `cloudflare_worker_secret_delete`
+  - Security: secret values are never echoed in tool output
+- **Add Worker Analytics tools** (2 tools) (#30)
+  - `cloudflare_worker_analytics`, `cloudflare_worker_usage`
+  - Account-scoped GraphQL queries for invocation metrics
+- **Add skills: cloudflare-kv-manage, cloudflare-worker-deploy** (#31)
+- New validation schemas: `NamespaceIdSchema`, `ScriptNameSchema`, `SecretNameSchema`, `KvKeySchema`
+- New types: `KvNamespace`, `KvKey`, `WorkerScript`, `WorkerRoute`, `WorkerSecret`, `WorkerAnalyticsRow`
+- Tool count: 42 → 59 (17 new tools across 4 modules)
+
 ## v2026.03.16.2
 
 - **Add pre-publish security scan** (#25)

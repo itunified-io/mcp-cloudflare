@@ -25,7 +25,7 @@ Slim Cloudflare MCP Server for managing DNS, zones, tunnels, WAF, Zero Trust, an
 
 ## Features
 
-Tools across 6 domains:
+59 tools across 10 domains:
 
 - **DNS** — Record management (A, AAAA, CNAME, MX, TXT, SRV, CAA, NS), batch operations
 - **Zones** — Zone listing, settings, SSL/TLS configuration, cache management
@@ -33,6 +33,10 @@ Tools across 6 domains:
 - **WAF** — Ruleset management, custom firewall rules, rate limiting
 - **Zero Trust** — Access applications, policies, identity providers, Gateway status
 - **Security** — Security event analytics, IP access rules, DDoS configuration
+- **Workers KV** — Namespace management, key-value read/write/delete, key listing
+- **Workers** — Script deployment, route management
+- **Worker Secrets** — Secret management (names only, values never exposed)
+- **Worker Analytics** — Invocation metrics, CPU time, error rates via GraphQL
 
 ## Quick Start
 
@@ -80,6 +84,8 @@ Create an API Token at `dash.cloudflare.com/profile/api-tokens` with the followi
 - **WAF**: Zone > Firewall Services > Edit
 - **Zero Trust**: Account > Access: Apps and Policies > Edit
 - **Security events**: Zone > Analytics > Read
+- **Workers KV**: Account > Workers KV Storage > Edit
+- **Workers**: Account > Worker Scripts > Edit
 
 ## Multi-Zone Support
 
@@ -108,6 +114,8 @@ Claude Code skills compose MCP tools into higher-level workflows. See [`.claude/
 | cloudflare-tunnel-management | — | Tunnel management — create, configure ingress, monitor connections |
 | cloudflare-waf-management | — | WAF management — custom rules, rulesets, IP access, Under Attack |
 | cloudflare-zero-trust | — | Zero Trust — access apps, policies, identity providers, gateway |
+| cloudflare-kv-manage | — | Workers KV — namespace and key-value CRUD operations |
+| cloudflare-worker-deploy | — | Workers — script deployment, routes, secrets, analytics |
 
 ## Development
 

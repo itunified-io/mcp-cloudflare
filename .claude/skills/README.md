@@ -18,6 +18,8 @@ Claude Code skills compose multiple MCP tools into higher-level workflows. Skill
 | cloudflare-tunnel-management | Auto | — | Tunnel management — create, configure ingress, monitor connections |
 | cloudflare-waf-management | Auto | — | WAF management — custom rules, rulesets, IP access, Under Attack |
 | cloudflare-zero-trust | Auto | — | Zero Trust — access apps, policies, identity providers, gateway |
+| cloudflare-kv-manage | Auto | — | Workers KV — namespace and key-value CRUD operations |
+| cloudflare-worker-deploy | Auto | — | Workers — script deployment, routes, secrets, analytics |
 
 ---
 
@@ -163,3 +165,42 @@ Claude Code skills compose multiple MCP tools into higher-level workflows. Skill
 - `cloudflare_zt_gateway_status` — Gateway status
 
 **Triggers:** User asks to manage Zero Trust applications, policies, or identity providers.
+
+---
+
+### cloudflare-kv-manage
+
+**Type:** Auto-invocable
+**Description:** Manages Workers KV namespaces and key-value pairs. Covers creating namespaces, listing keys, reading and writing values, setting TTLs, and deleting keys and namespaces.
+
+**Tools used:**
+- `cloudflare_kv_namespace_list` — List all KV namespaces
+- `cloudflare_kv_namespace_create` — Create a new namespace
+- `cloudflare_kv_namespace_delete` — Delete a namespace (destructive)
+- `cloudflare_kv_list_keys` — List keys with optional prefix filter
+- `cloudflare_kv_read` — Read value by key
+- `cloudflare_kv_write` — Write key-value pair with optional TTL
+- `cloudflare_kv_delete` — Delete a key
+
+**Triggers:** User asks to manage KV namespaces, store/retrieve values, or work with Workers KV.
+
+---
+
+### cloudflare-worker-deploy
+
+**Type:** Auto-invocable
+**Description:** Deploys and manages Cloudflare Workers scripts. Covers listing workers, deploying scripts, configuring routes, managing secrets, and viewing analytics. Handles the full deployment lifecycle.
+
+**Tools used:**
+- `cloudflare_worker_list` — List all worker scripts
+- `cloudflare_worker_deploy` — Deploy a worker script (multipart upload)
+- `cloudflare_worker_delete` — Delete a worker script (destructive)
+- `cloudflare_worker_route_list` — List routes for a zone
+- `cloudflare_worker_route_create` — Create a route for a zone
+- `cloudflare_worker_secret_list` — List secret names
+- `cloudflare_worker_secret_set` — Set a secret (value never echoed)
+- `cloudflare_worker_secret_delete` — Delete a secret
+- `cloudflare_worker_analytics` — Time-series invocation metrics
+- `cloudflare_worker_usage` — Per-script aggregated usage
+
+**Triggers:** User asks to deploy workers, manage worker routes or secrets, or view worker analytics.

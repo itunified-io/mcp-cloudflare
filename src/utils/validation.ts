@@ -85,3 +85,25 @@ export const IpAccessRuleTargetSchema = z.enum(["ip", "ip_range", "asn", "countr
 export const ZoneNameOrIdSchema = z
   .string()
   .min(1, "Zone name or ID is required");
+
+/** 32-character hex string used as Workers KV namespace IDs */
+export const NamespaceIdSchema = z
+  .string()
+  .regex(/^[0-9a-f]{32}$/i, "Invalid KV namespace ID (expected 32-character hex string)");
+
+/** Worker script name — lowercase alphanumeric with hyphens */
+export const ScriptNameSchema = z
+  .string()
+  .min(1, "Script name is required")
+  .regex(/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/, "Invalid script name (lowercase alphanumeric and hyphens only)");
+
+/** Worker secret name */
+export const SecretNameSchema = z
+  .string()
+  .min(1, "Secret name is required");
+
+/** KV key name — max 512 bytes */
+export const KvKeySchema = z
+  .string()
+  .min(1, "KV key is required")
+  .max(512, "KV key must be 512 characters or less");

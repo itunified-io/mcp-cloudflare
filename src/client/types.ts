@@ -260,3 +260,62 @@ export interface IpAccessRule {
   created_on: string;
   modified_on: string;
 }
+
+// Workers KV types
+
+export interface KvNamespace {
+  id: string;
+  title: string;
+  supports_url_encoding: boolean;
+}
+
+export interface KvKey {
+  name: string;
+  expiration?: number;
+  metadata?: Record<string, unknown>;
+}
+
+// Workers Script types
+
+export interface WorkerScript {
+  id: string;
+  etag: string;
+  handlers: string[];
+  named_handlers?: Array<{ name: string; entrypoint: string }>;
+  modified_on: string;
+  created_on: string;
+  usage_model: string;
+  compatibility_date?: string;
+  compatibility_flags?: string[];
+}
+
+export interface WorkerRoute {
+  id: string;
+  pattern: string;
+  script: string;
+}
+
+// Worker Secret types
+
+export interface WorkerSecret {
+  name: string;
+  type: string;
+}
+
+// Worker Analytics types
+
+export interface WorkerAnalyticsRow {
+  dimensions: {
+    scriptName: string;
+    datetime?: string;
+  };
+  sum: {
+    requests: number;
+    errors: number;
+    subrequests: number;
+  };
+  quantiles: {
+    cpuTimeP50: number;
+    cpuTimeP99: number;
+  };
+}

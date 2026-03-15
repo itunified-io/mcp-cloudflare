@@ -13,6 +13,10 @@ import { tunnelsToolDefinitions, handleTunnelsTool } from './tools/tunnels.js';
 import { wafToolDefinitions, handleWafTool } from './tools/waf.js';
 import { zerotrustToolDefinitions, handleZerotrustTool } from './tools/zerotrust.js';
 import { securityToolDefinitions, handleSecurityTool } from './tools/security.js';
+import { kvToolDefinitions, handleKvTool } from './tools/kv.js';
+import { workersToolDefinitions, handleWorkersTool } from './tools/workers.js';
+import { workerSecretsToolDefinitions, handleWorkerSecretsTool } from './tools/worker-secrets.js';
+import { workerAnalyticsToolDefinitions, handleWorkerAnalyticsTool } from './tools/worker-analytics.js';
 
 const allToolDefinitions: Tool[] = ([
   ...zonesToolDefinitions,
@@ -22,6 +26,10 @@ const allToolDefinitions: Tool[] = ([
   ...wafToolDefinitions,
   ...zerotrustToolDefinitions,
   ...securityToolDefinitions,
+  ...kvToolDefinitions,
+  ...workersToolDefinitions,
+  ...workerSecretsToolDefinitions,
+  ...workerAnalyticsToolDefinitions,
 ] as unknown) as Tool[];
 
 const toolHandlers = new Map<
@@ -36,6 +44,10 @@ for (const def of tunnelsToolDefinitions) toolHandlers.set(def.name, handleTunne
 for (const def of wafToolDefinitions) toolHandlers.set(def.name, handleWafTool);
 for (const def of zerotrustToolDefinitions) toolHandlers.set(def.name, handleZerotrustTool);
 for (const def of securityToolDefinitions) toolHandlers.set(def.name, handleSecurityTool);
+for (const def of kvToolDefinitions) toolHandlers.set(def.name, handleKvTool);
+for (const def of workersToolDefinitions) toolHandlers.set(def.name, handleWorkersTool);
+for (const def of workerSecretsToolDefinitions) toolHandlers.set(def.name, handleWorkerSecretsTool);
+for (const def of workerAnalyticsToolDefinitions) toolHandlers.set(def.name, handleWorkerAnalyticsTool);
 
 const server = new Server(
   { name: 'mcp-cloudflare', version: '2026.3.13' },
