@@ -33,3 +33,6 @@ test-results/
 
 # Superpowers plugin working artifacts (ADR-0021)
 docs/superpowers/
+
+# MCP Registry tokens (ADR-0024)
+.mcpregistry_*
