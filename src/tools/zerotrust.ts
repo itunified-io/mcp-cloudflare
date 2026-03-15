@@ -26,6 +26,25 @@ const ZtCreatePolicySchema = z.object({
     .min(1, "At least one include rule is required"),
 });
 
+const ZtAppTypeSchema = z.enum([
+  "self_hosted",
+  "saas",
+  "ssh",
+  "vnc",
+  "bookmark",
+]);
+
+const ZtCreateAppSchema = z.object({
+  name: z.string().min(1, "App name is required"),
+  domain: z.string().min(1, "Domain is required"),
+  type: ZtAppTypeSchema.default("self_hosted"),
+  session_duration: z.string().optional(),
+  allowed_idps: z.array(z.string()).optional(),
+  auto_redirect_to_identity: z.boolean().optional(),
+  app_launcher_visible: z.boolean().optional(),
+  self_hosted_domains: z.array(z.string()).optional(),
+});
+
 const ZtListIdpsSchema = z.object({});
 
 const ZtGatewayStatusSchema = z.object({});
@@ -66,6 +85,52 @@ export const zerotrustToolDefinitions = [
         app_id: { type: "string", description: "Access application ID (UUID)" },
       },
       required: ["app_id"],
+    },
+  },
+  {
+    name: "cloudflare_zt_create_app",
+    description:
+      "Create a new Zero Trust Access application. Protects a domain with identity-based access control.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        name: { type: "string", description: "Application name" },
+        domain: {
+          type: "string",
+          description:
+            "Primary application domain (e.g., 'app.example.com' or 'app.example.com/path*')",
+        },
+        type: {
+          type: "string",
+          enum: ["self_hosted", "saas", "ssh", "vnc", "bookmark"],
+          description: "Application type (default: self_hosted)",
+        },
+        session_duration: {
+          type: "string",
+          description: "Session duration (e.g., '8h', '24h', '30m'). Default: 24h",
+        },
+        allowed_idps: {
+          type: "array",
+          description: "Array of IdP UUIDs to restrict login methods. Omit to allow all configured IdPs.",
+          items: { type: "string" },
+        },
+        auto_redirect_to_identity: {
+          type: "boolean",
+          description:
+            "Auto-redirect to IdP login instead of showing app launcher (default: false)",
+        },
+        app_launcher_visible: {
+          type: "boolean",
+          description: "Show in the Zero Trust App Launcher (default: true)",
+        },
+        self_hosted_domains: {
+          type: "array",
+          description:
+            "Additional domains for this app (multi-domain). Primary domain is always included.",
+          items: { type: "string" },
+        },
+      },
+      required: ["name", "domain"],
     },
   },
   {
@@ -147,6 +212,31 @@ export async function handleZerotrustTool(
         const accountId = requireAccountId(client);
         const result = await client.get(
           `/accounts/${accountId}/access/apps/${parsed.app_id}`,
+        );
+        return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
+      }
+
+      case "cloudflare_zt_create_app": {
+        const parsed = ZtCreateAppSchema.parse(args);
+        const accountId = requireAccountId(client);
+        const body: Record<string, unknown> = {
+          name: parsed.name,
+          domain: parsed.domain,
+          type: parsed.type,
+        };
+        if (parsed.session_duration !== undefined)
+          body["session_duration"] = parsed.session_duration;
+        if (parsed.allowed_idps !== undefined)
+          body["allowed_idps"] = parsed.allowed_idps;
+        if (parsed.auto_redirect_to_identity !== undefined)
+          body["auto_redirect_to_identity"] = parsed.auto_redirect_to_identity;
+        if (parsed.app_launcher_visible !== undefined)
+          body["app_launcher_visible"] = parsed.app_launcher_visible;
+        if (parsed.self_hosted_domains !== undefined)
+          body["self_hosted_domains"] = parsed.self_hosted_domains;
+        const result = await client.post(
+          `/accounts/${accountId}/access/apps`,
+          body,
         );
         return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
       }

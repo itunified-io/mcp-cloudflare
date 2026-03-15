@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 This project uses [Calendar Versioning](https://calver.org/) (`YYYY.MM.DD.TS`).
 
 
+## v2026.03.15.4
+
+- **Add `cloudflare_zt_create_app` tool** (#33)
+  - Create Zero Trust Access applications programmatically
+  - Supports: self_hosted, saas, ssh, vnc, bookmark app types
+  - Optional: session_duration, allowed_idps, auto_redirect, self_hosted_domains
+  - 7 new tests (required params, optional params, validation, defaults, error handling)
+  - Tool count: 59 → 60
+
 ## v2026.03.15.1
 
 - **Add Workers KV tools** (7 tools) (#27)
