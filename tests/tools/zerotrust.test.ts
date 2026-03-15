@@ -28,8 +28,8 @@ function mockClient(overrides: Partial<CloudflareClient> = {}): CloudflareClient
 // ---------------------------------------------------------------------------
 
 describe('Zero Trust Tool Definitions', () => {
-  it('exports 6 tool definitions', () => {
-    expect(zerotrustToolDefinitions).toHaveLength(6);
+  it('exports 7 tool definitions', () => {
+    expect(zerotrustToolDefinitions).toHaveLength(7);
   });
 
   it('all tools have cloudflare_zt_ prefix', () => {
@@ -101,6 +101,125 @@ describe('handleZerotrustTool', () => {
       const result = await handleZerotrustTool('cloudflare_zt_get_app', {}, client);
 
       expect(result.content[0].text).toContain('Error executing cloudflare_zt_get_app');
+    });
+  });
+
+  describe('cloudflare_zt_create_app', () => {
+    it('creates a self_hosted app with required params only', async () => {
+      const mockApp = { id: APP_ID, name: 'UAT App', domain: 'uat.example.com', type: 'self_hosted' };
+      const client = mockClient({ post: vi.fn().mockResolvedValue(mockApp) });
+
+      const result = await handleZerotrustTool(
+        'cloudflare_zt_create_app',
+        { name: 'UAT App', domain: 'uat.example.com' },
+        client,
+      );
+
+      expect(result.content[0].text).toContain('UAT App');
+      expect(client.post).toHaveBeenCalledWith(
+        `/accounts/${ACCOUNT_ID}/access/apps`,
+        { name: 'UAT App', domain: 'uat.example.com', type: 'self_hosted' },
+      );
+    });
+
+    it('creates an app with all optional params', async () => {
+      const IDP_ID = 'a2aefb8b-65f3-4d5e-80c0-0dd046ddc4b2';
+      const mockApp = { id: APP_ID, name: 'Full App', domain: 'app.example.com' };
+      const client = mockClient({ post: vi.fn().mockResolvedValue(mockApp) });
+
+      const result = await handleZerotrustTool(
+        'cloudflare_zt_create_app',
+        {
+          name: 'Full App',
+          domain: 'app.example.com',
+          type: 'self_hosted',
+          session_duration: '8h',
+          allowed_idps: [IDP_ID],
+          auto_redirect_to_identity: true,
+          app_launcher_visible: true,
+          self_hosted_domains: ['app.example.com', 'app2.example.com'],
+        },
+        client,
+      );
+
+      expect(result.content[0].text).toContain('Full App');
+      expect(client.post).toHaveBeenCalledWith(
+        `/accounts/${ACCOUNT_ID}/access/apps`,
+        {
+          name: 'Full App',
+          domain: 'app.example.com',
+          type: 'self_hosted',
+          session_duration: '8h',
+          allowed_idps: [IDP_ID],
+          auto_redirect_to_identity: true,
+          app_launcher_visible: true,
+          self_hosted_domains: ['app.example.com', 'app2.example.com'],
+        },
+      );
+    });
+
+    it('requires name parameter', async () => {
+      const client = mockClient();
+
+      const result = await handleZerotrustTool(
+        'cloudflare_zt_create_app',
+        { domain: 'app.example.com' },
+        client,
+      );
+
+      expect(result.content[0].text).toContain('Error executing cloudflare_zt_create_app');
+    });
+
+    it('requires domain parameter', async () => {
+      const client = mockClient();
+
+      const result = await handleZerotrustTool(
+        'cloudflare_zt_create_app',
+        { name: 'My App' },
+        client,
+      );
+
+      expect(result.content[0].text).toContain('Error executing cloudflare_zt_create_app');
+    });
+
+    it('rejects invalid app type', async () => {
+      const client = mockClient();
+
+      const result = await handleZerotrustTool(
+        'cloudflare_zt_create_app',
+        { name: 'My App', domain: 'app.example.com', type: 'invalid' },
+        client,
+      );
+
+      expect(result.content[0].text).toContain('Error executing cloudflare_zt_create_app');
+    });
+
+    it('defaults type to self_hosted when omitted', async () => {
+      const mockApp = { id: APP_ID, name: 'Default Type', domain: 'app.example.com' };
+      const client = mockClient({ post: vi.fn().mockResolvedValue(mockApp) });
+
+      await handleZerotrustTool(
+        'cloudflare_zt_create_app',
+        { name: 'Default Type', domain: 'app.example.com' },
+        client,
+      );
+
+      expect(client.post).toHaveBeenCalledWith(
+        `/accounts/${ACCOUNT_ID}/access/apps`,
+        expect.objectContaining({ type: 'self_hosted' }),
+      );
+    });
+
+    it('returns error when account_id is missing', async () => {
+      const client = mockClient({ getAccountId: vi.fn().mockReturnValue(undefined) });
+
+      const result = await handleZerotrustTool(
+        'cloudflare_zt_create_app',
+        { name: 'My App', domain: 'app.example.com' },
+        client,
+      );
+
+      expect(result.content[0].text).toContain('CLOUDFLARE_ACCOUNT_ID');
     });
   });
 
