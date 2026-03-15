@@ -5,6 +5,7 @@
 [![CalVer](https://img.shields.io/badge/calver-YYYY.0M.DD.MICRO-22bfae?style=flat-square)](https://calver.org)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D20-brightgreen?style=flat-square)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?style=flat-square)](https://www.typescriptlang.org/)
+[![Glama](https://glama.ai/mcp/servers/itunified-io/mcp-cloudflare/badges/score.svg)](https://glama.ai/mcp/servers/itunified-io/mcp-cloudflare)
 
 Slim Cloudflare MCP Server for managing DNS, zones, tunnels, WAF, Zero Trust, and security via Cloudflare API v4.
 
