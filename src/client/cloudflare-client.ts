@@ -127,6 +127,35 @@ export class CloudflareClient {
     }
   }
 
+  /**
+   * PUT with multipart/form-data (used for Workers script upload).
+   */
+  async putForm<T>(path: string, formData: FormData): Promise<T> {
+    try {
+      const response = await this.http.put<CloudflareResponse<T>>(path, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      this.assertSuccess(response.data, `PUT ${path}`);
+      return response.data.result;
+    } catch (error: unknown) {
+      throw extractError(error, `PUT ${path}`);
+    }
+  }
+
+  /**
+   * PUT a raw text body (not JSON). Used for KV value writes.
+   */
+  async putRaw(path: string, body: string): Promise<void> {
+    try {
+      const response = await this.http.put<CloudflareResponse<unknown>>(path, body, {
+        headers: { "Content-Type": "text/plain" },
+      });
+      this.assertSuccess(response.data, `PUT ${path}`);
+    } catch (error: unknown) {
+      throw extractError(error, `PUT ${path}`);
+    }
+  }
+
   async graphql<T>(query: string, variables?: Record<string, unknown>): Promise<T> {
     try {
       const response = await this.http.post<{ data: T; errors?: Array<{ message: string }> }>(
