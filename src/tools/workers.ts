@@ -1,3 +1,6 @@
+import { execFileSync } from "node:child_process";
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
 import { z } from "zod";
 import type { CloudflareClient } from "../client/cloudflare-client.js";
 import { ScriptNameSchema, ZoneNameOrIdSchema } from "../utils/validation.js";
@@ -28,6 +31,11 @@ const WorkerRouteCreateSchema = z.object({
   zone_id: ZoneNameOrIdSchema,
   pattern: z.string().min(1, "Route pattern is required"),
   script: ScriptNameSchema,
+});
+
+const WorkerDeployProjectSchema = z.object({
+  project_path: z.string().min(1, "Project path is required"),
+  environment: z.string().optional(),
 });
 
 // ---------------------------------------------------------------------------
@@ -121,6 +129,27 @@ export const workersToolDefinitions = [
       required: ["zone_id", "pattern", "script"],
     },
   },
+  {
+    name: "cloudflare_worker_deploy_project",
+    description:
+      "Deploy a multi-file Workers project using wrangler. Runs 'npx wrangler deploy' in the given project directory. " +
+      "Requires wrangler installed in the project (devDependency) and a wrangler.toml config file. " +
+      "Uses the CLOUDFLARE_API_TOKEN from the MCP server environment.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        project_path: {
+          type: "string",
+          description: "Absolute path to the Workers project directory containing wrangler.toml",
+        },
+        environment: {
+          type: "string",
+          description: "Optional wrangler environment name (e.g., 'uat', 'production'). Maps to [env.<name>] in wrangler.toml",
+        },
+      },
+      required: ["project_path"],
+    },
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -187,6 +216,50 @@ export async function handleWorkersTool(
           { pattern: parsed.pattern, script: parsed.script },
         );
         return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
+      }
+
+      case "cloudflare_worker_deploy_project": {
+        const parsed = WorkerDeployProjectSchema.parse(args);
+        const projectPath = resolve(parsed.project_path);
+
+        // Validate project directory exists
+        if (!existsSync(projectPath)) {
+          throw new Error(`Project directory does not exist: ${projectPath}`);
+        }
+
+        // Validate wrangler.toml exists
+        const wranglerToml = resolve(projectPath, "wrangler.toml");
+        if (!existsSync(wranglerToml)) {
+          throw new Error(`wrangler.toml not found in ${projectPath}`);
+        }
+
+        // Build args array for execFileSync (no shell — prevents injection)
+        const wranglerArgs = ["wrangler", "deploy"];
+        if (parsed.environment) {
+          wranglerArgs.push("--env", parsed.environment);
+        }
+
+        // Pass CLOUDFLARE_API_TOKEN from the MCP server's environment
+        const deployEnv: Record<string, string> = { ...(process.env as Record<string, string>) };
+        const apiToken = process.env.CLOUDFLARE_API_TOKEN;
+        if (apiToken) {
+          deployEnv.CLOUDFLARE_API_TOKEN = apiToken;
+        }
+
+        // execFileSync with npx binary — no shell invocation
+        const output = execFileSync("npx", wranglerArgs, {
+          cwd: projectPath,
+          env: deployEnv,
+          encoding: "utf-8",
+          timeout: 120_000, // 2 minute timeout
+        });
+
+        return {
+          content: [{
+            type: "text",
+            text: `Deployed successfully from ${projectPath}${parsed.environment ? ` (env: ${parsed.environment})` : ""}:\n\n${output}`,
+          }],
+        };
       }
 
       default:

@@ -1,6 +1,15 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { workersToolDefinitions, handleWorkersTool } from '../../src/tools/workers.js';
 import type { CloudflareClient } from '../../src/client/cloudflare-client.js';
+
+// Mock child_process and fs for deploy_project tests
+vi.mock('node:child_process', () => ({
+  execFileSync: vi.fn().mockReturnValue('Worker deployed successfully\nhttps://landing-page.workers.dev'),
+}));
+
+vi.mock('node:fs', () => ({
+  existsSync: vi.fn().mockReturnValue(true),
+}));
 
 const ACCOUNT_ID = '00000000000000000000000000000001';
 const ZONE_ID = '00000000000000000000000000000002';
@@ -29,8 +38,8 @@ function mockClient(overrides: Partial<CloudflareClient> = {}): CloudflareClient
 // ---------------------------------------------------------------------------
 
 describe('Workers Tool Definitions', () => {
-  it('exports 5 tool definitions', () => {
-    expect(workersToolDefinitions).toHaveLength(5);
+  it('exports 6 tool definitions', () => {
+    expect(workersToolDefinitions).toHaveLength(6);
   });
 
   it('all tools have cloudflare_worker_ prefix', () => {
@@ -205,6 +214,114 @@ describe('handleWorkersTool', () => {
       );
 
       expect(result.content[0].text).toContain('Error executing cloudflare_worker_route_create');
+    });
+  });
+
+  describe('cloudflare_worker_deploy_project', () => {
+    let execFileSyncMock: ReturnType<typeof vi.fn>;
+    let existsSyncMock: ReturnType<typeof vi.fn>;
+
+    beforeEach(async () => {
+      const childProcess = await import('node:child_process');
+      const fs = await import('node:fs');
+      execFileSyncMock = childProcess.execFileSync as unknown as ReturnType<typeof vi.fn>;
+      existsSyncMock = fs.existsSync as unknown as ReturnType<typeof vi.fn>;
+      execFileSyncMock.mockReturnValue('Worker deployed successfully\nhttps://landing-page.workers.dev');
+      existsSyncMock.mockReturnValue(true);
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('deploys a wrangler project', async () => {
+      const client = mockClient();
+
+      const result = await handleWorkersTool(
+        'cloudflare_worker_deploy_project',
+        { project_path: '/tmp/my-worker' },
+        client,
+      );
+
+      expect(result.content[0].text).toContain('Deployed successfully');
+      expect(result.content[0].text).toContain('landing-page.workers.dev');
+      expect(execFileSyncMock).toHaveBeenCalledWith(
+        'npx',
+        ['wrangler', 'deploy'],
+        expect.objectContaining({ cwd: '/tmp/my-worker' }),
+      );
+    });
+
+    it('passes environment flag when specified', async () => {
+      const client = mockClient();
+
+      const result = await handleWorkersTool(
+        'cloudflare_worker_deploy_project',
+        { project_path: '/tmp/my-worker', environment: 'uat' },
+        client,
+      );
+
+      expect(result.content[0].text).toContain('env: uat');
+      expect(execFileSyncMock).toHaveBeenCalledWith(
+        'npx',
+        ['wrangler', 'deploy', '--env', 'uat'],
+        expect.objectContaining({ cwd: '/tmp/my-worker' }),
+      );
+    });
+
+    it('errors when project directory does not exist', async () => {
+      existsSyncMock.mockReturnValue(false);
+      const client = mockClient();
+
+      const result = await handleWorkersTool(
+        'cloudflare_worker_deploy_project',
+        { project_path: '/tmp/nonexistent' },
+        client,
+      );
+
+      expect(result.content[0].text).toContain('does not exist');
+    });
+
+    it('errors when wrangler.toml is missing', async () => {
+      // First call (project dir) returns true, second call (wrangler.toml) returns false
+      existsSyncMock.mockReturnValueOnce(true).mockReturnValueOnce(false);
+      const client = mockClient();
+
+      const result = await handleWorkersTool(
+        'cloudflare_worker_deploy_project',
+        { project_path: '/tmp/no-toml' },
+        client,
+      );
+
+      expect(result.content[0].text).toContain('wrangler.toml not found');
+    });
+
+    it('requires project_path', async () => {
+      const client = mockClient();
+
+      const result = await handleWorkersTool(
+        'cloudflare_worker_deploy_project',
+        {},
+        client,
+      );
+
+      expect(result.content[0].text).toContain('Error executing cloudflare_worker_deploy_project');
+    });
+
+    it('handles wrangler execution errors', async () => {
+      execFileSyncMock.mockImplementation(() => {
+        throw new Error('wrangler deploy failed: authentication error');
+      });
+      const client = mockClient();
+
+      const result = await handleWorkersTool(
+        'cloudflare_worker_deploy_project',
+        { project_path: '/tmp/my-worker' },
+        client,
+      );
+
+      expect(result.content[0].text).toContain('Error executing cloudflare_worker_deploy_project');
+      expect(result.content[0].text).toContain('authentication error');
     });
   });
 

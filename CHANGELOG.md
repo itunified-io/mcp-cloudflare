@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 This project uses [Calendar Versioning](https://calver.org/) (`YYYY.MM.DD.TS`).
 
 
+## v2026.03.16.1
+
+- **Add `cloudflare_worker_deploy_project` tool** (#35)
+  - Deploy multi-file TypeScript Workers projects using wrangler
+  - Parameters: `project_path` (required), `environment` (optional, e.g., 'uat', 'production')
+  - Uses `execFileSync` (no shell invocation) for security
+  - Validates project directory and wrangler.toml existence before deployment
+  - Passes `CLOUDFLARE_API_TOKEN` from MCP server environment
+  - 6 new tests (deploy, env flag, missing dir, missing toml, missing params, exec errors)
+  - Tool count: 60 → 61
+
 ## v2026.03.15.4
 
 - **Add `cloudflare_zt_create_app` tool** (#33)
