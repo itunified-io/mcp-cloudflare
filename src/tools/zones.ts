@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { CloudflareClient } from "../client/cloudflare-client.js";
-import { ZoneNameOrIdSchema } from "../utils/validation.js";
+import { ZoneNameOrIdSchema, CoercedBooleanSchema } from "../utils/validation.js";
 
 // ---------------------------------------------------------------------------
 // Zod schemas for input validation
@@ -25,7 +25,7 @@ const ZoneSettingGetSchema = z.object({
 const ZoneSettingUpdateSchema = z.object({
   zone_id: ZoneNameOrIdSchema,
   setting_name: z.string().min(1, "Setting name is required"),
-  value: z.union([z.string(), z.number(), z.boolean(), z.record(z.unknown()), z.array(z.unknown())]),
+  value: z.union([z.string(), z.number(), CoercedBooleanSchema, z.record(z.unknown()), z.array(z.unknown())]),
 });
 
 // ---------------------------------------------------------------------------
