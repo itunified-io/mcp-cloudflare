@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 This project uses [Calendar Versioning](https://calver.org/) (`YYYY.MM.DD.TS`).
 
 
+## v2026.03.16.11
+
+- **Fix R2 domain_add: include zoneId in request body** (#47)
+  - CF API requires `zoneId` field in POST body for custom domain registration
+  - Added `zone_id` param (supports zone name auto-resolution)
+  - Added optional `enabled` param (default: true)
+
 ## v2026.03.16.10
 
 - **Fix R2 custom domain API path and HTTP method** (#47)
