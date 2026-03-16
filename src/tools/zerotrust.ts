@@ -48,6 +48,25 @@ const ZtCreateAppSchema = z.object({
 
 const ZtListIdpsSchema = z.object({});
 
+const ZtIdpTypeSchema = z.enum([
+  "github",
+  "google",
+  "saml",
+  "oidc",
+  "onetimepin",
+  "azureAD",
+  "okta",
+]);
+
+const ZtCreateIdpSchema = z.object({
+  name: z.string().min(1, "IdP name is required"),
+  type: ZtIdpTypeSchema,
+  config: z.object({
+    client_id: z.string().optional(),
+    client_secret: z.string().optional(),
+  }).passthrough(),
+});
+
 const ZtGatewayStatusSchema = z.object({});
 
 // ---------------------------------------------------------------------------
@@ -180,6 +199,32 @@ export const zerotrustToolDefinitions = [
     },
   },
   {
+    name: "cloudflare_zt_create_idp",
+    description:
+      "Create a new identity provider (IdP) for Zero Trust Access. Supports GitHub, Google, SAML, OIDC, Azure AD, Okta, and one-time PIN.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        name: { type: "string", description: "IdP display name (e.g., 'my-github-idp')" },
+        type: {
+          type: "string",
+          enum: ["github", "google", "saml", "oidc", "onetimepin", "azureAD", "okta"],
+          description: "Identity provider type",
+        },
+        config: {
+          type: "object",
+          description:
+            "Provider-specific configuration. For GitHub/Google/OIDC/Azure AD: { client_id, client_secret }. For SAML: { issuer_url, sso_target_url, attributes, ... }. For onetimepin: empty object {}.",
+          properties: {
+            client_id: { type: "string", description: "OAuth client ID" },
+            client_secret: { type: "string", description: "OAuth client secret" },
+          },
+        },
+      },
+      required: ["name", "type", "config"],
+    },
+  },
+  {
     name: "cloudflare_zt_gateway_status",
     description:
       "Get the Zero Trust Gateway (DNS/HTTP filtering) configuration status for the account.",
@@ -270,6 +315,25 @@ export async function handleZerotrustTool(
         const accountId = requireAccountId(client);
         const result = await client.get(`/accounts/${accountId}/access/identity_providers`);
         return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
+      }
+
+      case "cloudflare_zt_create_idp": {
+        const parsed = ZtCreateIdpSchema.parse(args);
+        const accountId = requireAccountId(client);
+        const result = await client.post(
+          `/accounts/${accountId}/access/identity_providers`,
+          {
+            name: parsed.name,
+            type: parsed.type,
+            config: parsed.config,
+          },
+        );
+        // Strip client_secret from response to avoid leaking it
+        const sanitized = JSON.parse(JSON.stringify(result));
+        if (sanitized?.config?.client_secret) {
+          sanitized.config.client_secret = "<redacted>";
+        }
+        return { content: [{ type: "text", text: JSON.stringify(sanitized, null, 2) }] };
       }
 
       case "cloudflare_zt_gateway_status": {
