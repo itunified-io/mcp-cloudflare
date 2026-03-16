@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 This project uses [Calendar Versioning](https://calver.org/) (`YYYY.MM.DD.TS`).
 
 
+## v2026.03.16.3
+
+- **Add `cloudflare_zt_create_idp` tool for Zero Trust IdP management** (#39)
+  - Create identity providers: GitHub, Google, SAML, OIDC, Azure AD, Okta, one-time PIN
+  - `client_secret` automatically redacted in response output (security)
+  - Zod validation for all parameters including IdP type enum
+  - 5 unit tests covering success, validation errors, missing account ID
+
 ## v2026.03.16.2
 
 - **Fix boolean parameter validation across 6 tools** (#37)

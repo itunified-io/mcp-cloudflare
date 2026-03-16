@@ -28,8 +28,8 @@ function mockClient(overrides: Partial<CloudflareClient> = {}): CloudflareClient
 // ---------------------------------------------------------------------------
 
 describe('Zero Trust Tool Definitions', () => {
-  it('exports 7 tool definitions', () => {
-    expect(zerotrustToolDefinitions).toHaveLength(7);
+  it('exports 8 tool definitions', () => {
+    expect(zerotrustToolDefinitions).toHaveLength(8);
   });
 
   it('all tools have cloudflare_zt_ prefix', () => {
@@ -317,6 +317,89 @@ describe('handleZerotrustTool', () => {
       expect(client.get).toHaveBeenCalledWith(
         `/accounts/${ACCOUNT_ID}/access/identity_providers`,
       );
+    });
+  });
+
+  describe('cloudflare_zt_create_idp', () => {
+    it('creates a GitHub IdP with client credentials', async () => {
+      const mockIdp = {
+        id: 'new-idp-id',
+        name: 'my-github-idp',
+        type: 'github',
+        config: { client_id: 'gh-client-id', client_secret: 'gh-secret-value', redirect_url: 'https://team.cloudflareaccess.com/cdn-cgi/access/callback' },
+      };
+      const client = mockClient({ post: vi.fn().mockResolvedValue(mockIdp) });
+
+      const result = await handleZerotrustTool(
+        'cloudflare_zt_create_idp',
+        {
+          name: 'my-github-idp',
+          type: 'github',
+          config: { client_id: 'gh-client-id', client_secret: 'gh-secret-value' },
+        },
+        client,
+      );
+
+      expect(result.content[0].text).toContain('my-github-idp');
+      expect(result.content[0].text).toContain('<redacted>');
+      expect(result.content[0].text).not.toContain('gh-secret-value');
+      expect(client.post).toHaveBeenCalledWith(
+        `/accounts/${ACCOUNT_ID}/access/identity_providers`,
+        {
+          name: 'my-github-idp',
+          type: 'github',
+          config: { client_id: 'gh-client-id', client_secret: 'gh-secret-value' },
+        },
+      );
+    });
+
+    it('creates a one-time PIN IdP with empty config', async () => {
+      const mockIdp = { id: 'otp-idp-id', name: 'email-otp', type: 'onetimepin', config: {} };
+      const client = mockClient({ post: vi.fn().mockResolvedValue(mockIdp) });
+
+      const result = await handleZerotrustTool(
+        'cloudflare_zt_create_idp',
+        { name: 'email-otp', type: 'onetimepin', config: {} },
+        client,
+      );
+
+      expect(result.content[0].text).toContain('email-otp');
+    });
+
+    it('requires name parameter', async () => {
+      const client = mockClient();
+
+      const result = await handleZerotrustTool(
+        'cloudflare_zt_create_idp',
+        { type: 'github', config: { client_id: 'id', client_secret: 'secret' } },
+        client,
+      );
+
+      expect(result.content[0].text).toContain('Error executing cloudflare_zt_create_idp');
+    });
+
+    it('rejects invalid IdP type', async () => {
+      const client = mockClient();
+
+      const result = await handleZerotrustTool(
+        'cloudflare_zt_create_idp',
+        { name: 'test', type: 'invalid-type', config: {} },
+        client,
+      );
+
+      expect(result.content[0].text).toContain('Error executing cloudflare_zt_create_idp');
+    });
+
+    it('returns error when account_id is missing', async () => {
+      const client = mockClient({ getAccountId: vi.fn().mockReturnValue(undefined) });
+
+      const result = await handleZerotrustTool(
+        'cloudflare_zt_create_idp',
+        { name: 'test', type: 'github', config: { client_id: 'id', client_secret: 'secret' } },
+        client,
+      );
+
+      expect(result.content[0].text).toContain('CLOUDFLARE_ACCOUNT_ID');
     });
   });
 
