@@ -349,7 +349,7 @@ describe('handleR2Tool', () => {
 
       expect(result.content[0].text).toContain('assets.example.com');
       expect(client.get).toHaveBeenCalledWith(
-        `/accounts/${ACCOUNT_ID}/r2/buckets/assets-itunified-de/domains`,
+        `/accounts/${ACCOUNT_ID}/r2/buckets/assets-itunified-de/custom_domains`,
       );
     });
   });
@@ -367,7 +367,7 @@ describe('handleR2Tool', () => {
 
       expect(result.content[0].text).toContain('assets.example.com');
       expect(client.put).toHaveBeenCalledWith(
-        `/accounts/${ACCOUNT_ID}/r2/buckets/assets-itunified-de/domains`,
+        `/accounts/${ACCOUNT_ID}/r2/buckets/assets-itunified-de/custom_domains`,
         { domain: 'assets.example.com' },
       );
     });
@@ -396,7 +396,7 @@ describe('handleR2Tool', () => {
       );
 
       expect(client.delete).toHaveBeenCalledWith(
-        `/accounts/${ACCOUNT_ID}/r2/buckets/assets-itunified-de/domains/assets.example.com`,
+        `/accounts/${ACCOUNT_ID}/r2/buckets/assets-itunified-de/custom_domains/assets.example.com`,
       );
     });
   });
