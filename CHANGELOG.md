@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 This project uses [Calendar Versioning](https://calver.org/) (`YYYY.MM.DD.TS`).
 
 
+## v2026.03.16.8
+
+- **Add R2 custom domain management tools** (#45)
+  - 3 new tools: `cloudflare_r2_bucket_domain_list`, `cloudflare_r2_bucket_domain_add`, `cloudflare_r2_bucket_domain_remove`
+  - Attach/remove custom domains to R2 buckets for public access
+  - CF auto-creates CNAME DNS records when domains are attached
+  - 4 new unit tests (28 total R2 tests)
+  - R2 tools now total 10 (bucket CRUD + object ops + domain management)
+
 ## v2026.03.16.7
 
 - **Add R2 storage management tools** (#43)
