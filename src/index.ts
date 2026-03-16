@@ -53,7 +53,7 @@ for (const def of workerAnalyticsToolDefinitions) toolHandlers.set(def.name, han
 for (const def of webAnalyticsToolDefinitions) toolHandlers.set(def.name, handleWebAnalyticsTool);
 
 const server = new Server(
-  { name: 'mcp-cloudflare', version: '2026.3.16.4' },
+  { name: 'mcp-cloudflare', version: '2026.3.16.6' },
   { capabilities: { tools: {} } }
 );
 

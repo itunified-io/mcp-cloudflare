@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 This project uses [Calendar Versioning](https://calver.org/) (`YYYY.MM.DD.TS`).
 
 
-## v2026.03.16.4
+## v2026.03.16.6
 
 - **Add Web Analytics (RUM) tools** (#41)
   - 5 new tools: `cloudflare_web_analytics_list`, `cloudflare_web_analytics_create`, `cloudflare_web_analytics_get`, `cloudflare_web_analytics_delete`, `cloudflare_web_analytics_stats`
