@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 This project uses [Calendar Versioning](https://calver.org/) (`YYYY.MM.DD.TS`).
 
 
+## v2026.03.16.4
+
+- **Add Web Analytics (RUM) tools** (#41)
+  - 5 new tools: `cloudflare_web_analytics_list`, `cloudflare_web_analytics_create`, `cloudflare_web_analytics_get`, `cloudflare_web_analytics_delete`, `cloudflare_web_analytics_stats`
+  - CRUD via REST API (`/accounts/{id}/rum/site_info`)
+  - Stats via GraphQL (`httpRequestsAdaptiveGroups`) with configurable time range and limit
+  - 19 unit tests covering all tools, validation errors, and API error handling
+
 ## v2026.03.16.3
 
 - **Add `cloudflare_zt_create_idp` tool for Zero Trust IdP management** (#39)

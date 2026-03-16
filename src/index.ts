@@ -17,6 +17,7 @@ import { kvToolDefinitions, handleKvTool } from './tools/kv.js';
 import { workersToolDefinitions, handleWorkersTool } from './tools/workers.js';
 import { workerSecretsToolDefinitions, handleWorkerSecretsTool } from './tools/worker-secrets.js';
 import { workerAnalyticsToolDefinitions, handleWorkerAnalyticsTool } from './tools/worker-analytics.js';
+import { webAnalyticsToolDefinitions, handleWebAnalyticsTool } from './tools/web-analytics.js';
 
 const allToolDefinitions: Tool[] = ([
   ...zonesToolDefinitions,
@@ -30,6 +31,7 @@ const allToolDefinitions: Tool[] = ([
   ...workersToolDefinitions,
   ...workerSecretsToolDefinitions,
   ...workerAnalyticsToolDefinitions,
+  ...webAnalyticsToolDefinitions,
 ] as unknown) as Tool[];
 
 const toolHandlers = new Map<
@@ -48,9 +50,10 @@ for (const def of kvToolDefinitions) toolHandlers.set(def.name, handleKvTool);
 for (const def of workersToolDefinitions) toolHandlers.set(def.name, handleWorkersTool);
 for (const def of workerSecretsToolDefinitions) toolHandlers.set(def.name, handleWorkerSecretsTool);
 for (const def of workerAnalyticsToolDefinitions) toolHandlers.set(def.name, handleWorkerAnalyticsTool);
+for (const def of webAnalyticsToolDefinitions) toolHandlers.set(def.name, handleWebAnalyticsTool);
 
 const server = new Server(
-  { name: 'mcp-cloudflare', version: '2026.3.16' },
+  { name: 'mcp-cloudflare', version: '2026.3.16.4' },
   { capabilities: { tools: {} } }
 );
 
