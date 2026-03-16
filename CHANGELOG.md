@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 This project uses [Calendar Versioning](https://calver.org/) (`YYYY.MM.DD.TS`).
 
 
+## v2026.03.16.9
+
+- **Fix R2 custom domain API path** (#47)
+  - CF API v4 uses `/custom_domains` not `/domains` for R2 bucket domain endpoints
+  - Fixed all 3 domain tools: `domain_list`, `domain_add`, `domain_remove`
+
 ## v2026.03.16.8
 
 - **Add R2 custom domain management tools** (#45)

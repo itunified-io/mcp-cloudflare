@@ -300,7 +300,7 @@ export async function handleR2Tool(
         const parsed = R2BucketDomainListSchema.parse(args);
         const accountId = requireAccountId(client);
         const result = await client.get(
-          `/accounts/${accountId}/r2/buckets/${parsed.bucket_name}/domains`,
+          `/accounts/${accountId}/r2/buckets/${parsed.bucket_name}/custom_domains`,
         );
         return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
       }
@@ -309,7 +309,7 @@ export async function handleR2Tool(
         const parsed = R2BucketDomainAddSchema.parse(args);
         const accountId = requireAccountId(client);
         const result = await client.put(
-          `/accounts/${accountId}/r2/buckets/${parsed.bucket_name}/domains`,
+          `/accounts/${accountId}/r2/buckets/${parsed.bucket_name}/custom_domains`,
           { domain: parsed.domain },
         );
         return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
@@ -319,7 +319,7 @@ export async function handleR2Tool(
         const parsed = R2BucketDomainRemoveSchema.parse(args);
         const accountId = requireAccountId(client);
         const result = await client.delete(
-          `/accounts/${accountId}/r2/buckets/${parsed.bucket_name}/domains/${parsed.domain}`,
+          `/accounts/${accountId}/r2/buckets/${parsed.bucket_name}/custom_domains/${parsed.domain}`,
         );
         return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
       }
