@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { CloudflareClient } from "../client/cloudflare-client.js";
+import { CoercedBooleanSchema } from "../utils/validation.js";
 
 // ---------------------------------------------------------------------------
 // Zod schemas for input validation
@@ -40,8 +41,8 @@ const ZtCreateAppSchema = z.object({
   type: ZtAppTypeSchema.default("self_hosted"),
   session_duration: z.string().optional(),
   allowed_idps: z.array(z.string()).optional(),
-  auto_redirect_to_identity: z.boolean().optional(),
-  app_launcher_visible: z.boolean().optional(),
+  auto_redirect_to_identity: CoercedBooleanSchema.optional(),
+  app_launcher_visible: CoercedBooleanSchema.optional(),
   self_hosted_domains: z.array(z.string()).optional(),
 });
 

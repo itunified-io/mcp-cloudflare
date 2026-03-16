@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 This project uses [Calendar Versioning](https://calver.org/) (`YYYY.MM.DD.TS`).
 
 
+## v2026.03.16.2
+
+- **Fix boolean parameter validation across 6 tools** (#37)
+  - MCP protocol sends boolean params as strings ("true"/"false"), Zod `z.boolean()` rejects them
+  - Add `CoercedBooleanSchema` to `src/utils/validation.ts` using `z.preprocess()` for string→boolean coercion
+  - Fixed tools: `cloudflare_dns_list`, `cloudflare_dns_create`, `cloudflare_dns_update` (proxied), `cloudflare_tunnel_list` (is_deleted), `cloudflare_zt_create_app` (auto_redirect_to_identity, app_launcher_visible), `cloudflare_zone_setting_update` (value union)
+  - Updated shared `ProxiedSchema` to use `CoercedBooleanSchema`
+
 ## v2026.03.16.1
 
 - **Add `cloudflare_worker_deploy_project` tool** (#35)

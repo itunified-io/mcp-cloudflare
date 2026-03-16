@@ -1,7 +1,7 @@
 import { z } from "zod";
 import type { CloudflareClient } from "../client/cloudflare-client.js";
 import type { DnsRecord } from "../client/types.js";
-import { ZoneNameOrIdSchema, RecordIdSchema, DnsRecordTypeSchema, TtlSchema } from "../utils/validation.js";
+import { ZoneNameOrIdSchema, RecordIdSchema, DnsRecordTypeSchema, TtlSchema, CoercedBooleanSchema } from "../utils/validation.js";
 
 // ---------------------------------------------------------------------------
 // Zod schemas for input validation
@@ -12,7 +12,7 @@ const DnsListSchema = z.object({
   type: DnsRecordTypeSchema.optional(),
   name: z.string().optional(),
   content: z.string().optional(),
-  proxied: z.boolean().optional(),
+  proxied: CoercedBooleanSchema.optional(),
   page: z.number().int().min(1).optional(),
   per_page: z.number().int().min(1).max(5000).optional(),
 });
@@ -27,7 +27,7 @@ const DnsCreateSchema = z.object({
   type: DnsRecordTypeSchema,
   name: z.string().min(1, "Record name is required"),
   content: z.string().min(1, "Record content is required"),
-  proxied: z.boolean().optional(),
+  proxied: CoercedBooleanSchema.optional(),
   ttl: TtlSchema.optional(),
   priority: z.number().int().min(0).max(65535).optional(),
 });
@@ -38,7 +38,7 @@ const DnsUpdateSchema = z.object({
   type: DnsRecordTypeSchema,
   name: z.string().min(1, "Record name is required"),
   content: z.string().min(1, "Record content is required"),
-  proxied: z.boolean().optional(),
+  proxied: CoercedBooleanSchema.optional(),
   ttl: TtlSchema.optional(),
   priority: z.number().int().min(0).max(65535).optional(),
 });

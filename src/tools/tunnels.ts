@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { randomBytes } from "crypto";
 import type { CloudflareClient } from "../client/cloudflare-client.js";
-import { TunnelIdSchema } from "../utils/validation.js";
+import { TunnelIdSchema, CoercedBooleanSchema } from "../utils/validation.js";
 
 // ---------------------------------------------------------------------------
 // Zod schemas for input validation
@@ -11,7 +11,7 @@ const TunnelListSchema = z.object({
   page: z.number().int().min(1).optional(),
   per_page: z.number().int().min(1).max(100).optional(),
   name: z.string().optional(),
-  is_deleted: z.boolean().optional(),
+  is_deleted: CoercedBooleanSchema.optional(),
 });
 
 const TunnelGetSchema = z.object({

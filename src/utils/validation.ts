@@ -60,8 +60,17 @@ export const TtlSchema = z
     "TTL must be 1 (auto) or between 60 and 86400 seconds",
   );
 
+/**
+ * Boolean schema that accepts both native booleans and string representations.
+ * MCP protocol may send boolean parameters as strings ("true"/"false").
+ */
+export const CoercedBooleanSchema = z.preprocess((v) => {
+  if (typeof v === "string") return v === "true";
+  return v;
+}, z.boolean());
+
 /** Whether a DNS record is proxied through Cloudflare */
-export const ProxiedSchema = z.boolean();
+export const ProxiedSchema = CoercedBooleanSchema;
 
 /** 32-character hex string used as Cloudflare account IDs */
 export const AccountIdSchema = z
