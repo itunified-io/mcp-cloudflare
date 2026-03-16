@@ -355,24 +355,28 @@ describe('handleR2Tool', () => {
   });
 
   describe('cloudflare_r2_bucket_domain_add', () => {
-    it('attaches a custom domain to a bucket', async () => {
-      const mockResult = { domain: 'assets.example.com', status: 'pending' };
-      const client = mockClient({ post: vi.fn().mockResolvedValue(mockResult) });
+    it('attaches a custom domain to a bucket with zone resolution', async () => {
+      const mockResult = { domain: 'assets.example.com', enabled: true };
+      const client = mockClient({
+        post: vi.fn().mockResolvedValue(mockResult),
+        resolveZoneId: vi.fn().mockResolvedValue('00000000000000000000000000000002'),
+      });
 
       const result = await handleR2Tool(
         'cloudflare_r2_bucket_domain_add',
-        { bucket_name: 'assets-itunified-de', domain: 'assets.example.com' },
+        { bucket_name: 'assets-itunified-de', domain: 'assets.example.com', zone_id: 'example.com' },
         client,
       );
 
       expect(result.content[0].text).toContain('assets.example.com');
+      expect(client.resolveZoneId).toHaveBeenCalledWith('example.com');
       expect(client.post).toHaveBeenCalledWith(
         `/accounts/${ACCOUNT_ID}/r2/buckets/assets-itunified-de/domains/custom`,
-        { domain: 'assets.example.com' },
+        { domain: 'assets.example.com', zoneId: '00000000000000000000000000000002', enabled: true },
       );
     });
 
-    it('requires domain parameter', async () => {
+    it('requires domain and zone_id parameters', async () => {
       const client = mockClient();
 
       const result = await handleR2Tool(

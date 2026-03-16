@@ -52,6 +52,8 @@ const R2BucketDomainListSchema = z.object({
 const R2BucketDomainAddSchema = z.object({
   bucket_name: R2BucketNameSchema,
   domain: z.string().min(1, "Domain is required"),
+  zone_id: z.string().min(1, "Zone ID or zone name is required"),
+  enabled: z.boolean().optional(),
 });
 
 const R2BucketDomainRemoveSchema = z.object({
@@ -188,8 +190,10 @@ export const r2ToolDefinitions = [
       properties: {
         bucket_name: { type: "string", description: "Name of the R2 bucket" },
         domain: { type: "string", description: "Custom domain to attach (e.g., assets.example.com)" },
+        zone_id: { type: "string", description: "Zone ID or zone name that owns the domain (e.g., example.com or 32-char hex ID)" },
+        enabled: { type: "boolean", description: "Whether the custom domain is enabled (default: true)" },
       },
-      required: ["bucket_name", "domain"],
+      required: ["bucket_name", "domain", "zone_id"],
     },
   },
   {
@@ -308,9 +312,15 @@ export async function handleR2Tool(
       case "cloudflare_r2_bucket_domain_add": {
         const parsed = R2BucketDomainAddSchema.parse(args);
         const accountId = requireAccountId(client);
+        const zoneId = await client.resolveZoneId(parsed.zone_id);
+        const body: Record<string, unknown> = {
+          domain: parsed.domain,
+          zoneId,
+          enabled: parsed.enabled ?? true,
+        };
         const result = await client.post(
           `/accounts/${accountId}/r2/buckets/${parsed.bucket_name}/domains/custom`,
-          { domain: parsed.domain },
+          body,
         );
         return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
       }
