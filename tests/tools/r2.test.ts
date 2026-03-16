@@ -28,8 +28,8 @@ function mockClient(overrides: Partial<CloudflareClient> = {}): CloudflareClient
 // ---------------------------------------------------------------------------
 
 describe('R2 Tool Definitions', () => {
-  it('exports 7 tool definitions', () => {
-    expect(r2ToolDefinitions).toHaveLength(7);
+  it('exports 10 tool definitions', () => {
+    expect(r2ToolDefinitions).toHaveLength(10);
   });
 
   it('all tools have cloudflare_r2_ prefix', () => {
@@ -324,6 +324,79 @@ describe('handleR2Tool', () => {
 
       expect(client.delete).toHaveBeenCalledWith(
         `/accounts/${ACCOUNT_ID}/r2/buckets/assets-itunified-de/objects/old-file.txt`,
+      );
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Custom domain operations
+  // ---------------------------------------------------------------------------
+
+  describe('cloudflare_r2_bucket_domain_list', () => {
+    it('lists custom domains for a bucket', async () => {
+      const mockDomains = {
+        domains: [
+          { domain: 'assets.example.com', zone_id: '00000000000000000000000000000002', status: 'active' },
+        ],
+      };
+      const client = mockClient({ get: vi.fn().mockResolvedValue(mockDomains) });
+
+      const result = await handleR2Tool(
+        'cloudflare_r2_bucket_domain_list',
+        { bucket_name: 'assets-itunified-de' },
+        client,
+      );
+
+      expect(result.content[0].text).toContain('assets.example.com');
+      expect(client.get).toHaveBeenCalledWith(
+        `/accounts/${ACCOUNT_ID}/r2/buckets/assets-itunified-de/domains`,
+      );
+    });
+  });
+
+  describe('cloudflare_r2_bucket_domain_add', () => {
+    it('attaches a custom domain to a bucket', async () => {
+      const mockResult = { domain: 'assets.example.com', status: 'pending' };
+      const client = mockClient({ put: vi.fn().mockResolvedValue(mockResult) });
+
+      const result = await handleR2Tool(
+        'cloudflare_r2_bucket_domain_add',
+        { bucket_name: 'assets-itunified-de', domain: 'assets.example.com' },
+        client,
+      );
+
+      expect(result.content[0].text).toContain('assets.example.com');
+      expect(client.put).toHaveBeenCalledWith(
+        `/accounts/${ACCOUNT_ID}/r2/buckets/assets-itunified-de/domains`,
+        { domain: 'assets.example.com' },
+      );
+    });
+
+    it('requires domain parameter', async () => {
+      const client = mockClient();
+
+      const result = await handleR2Tool(
+        'cloudflare_r2_bucket_domain_add',
+        { bucket_name: 'assets-itunified-de' },
+        client,
+      );
+
+      expect(result.content[0].text).toContain('Error executing cloudflare_r2_bucket_domain_add');
+    });
+  });
+
+  describe('cloudflare_r2_bucket_domain_remove', () => {
+    it('removes a custom domain from a bucket', async () => {
+      const client = mockClient({ delete: vi.fn().mockResolvedValue({}) });
+
+      await handleR2Tool(
+        'cloudflare_r2_bucket_domain_remove',
+        { bucket_name: 'assets-itunified-de', domain: 'assets.example.com' },
+        client,
+      );
+
+      expect(client.delete).toHaveBeenCalledWith(
+        `/accounts/${ACCOUNT_ID}/r2/buckets/assets-itunified-de/domains/assets.example.com`,
       );
     });
   });

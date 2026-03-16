@@ -45,6 +45,20 @@ const R2ObjectDeleteSchema = z.object({
   object_key: R2ObjectKeySchema,
 });
 
+const R2BucketDomainListSchema = z.object({
+  bucket_name: R2BucketNameSchema,
+});
+
+const R2BucketDomainAddSchema = z.object({
+  bucket_name: R2BucketNameSchema,
+  domain: z.string().min(1, "Domain is required"),
+});
+
+const R2BucketDomainRemoveSchema = z.object({
+  bucket_name: R2BucketNameSchema,
+  domain: z.string().min(1, "Domain is required"),
+});
+
 // ---------------------------------------------------------------------------
 // Account ID helper
 // ---------------------------------------------------------------------------
@@ -155,6 +169,41 @@ export const r2ToolDefinitions = [
       required: ["bucket_name", "object_key"],
     },
   },
+  {
+    name: "cloudflare_r2_bucket_domain_list",
+    description: "List custom domains attached to an R2 bucket. Shows domain name, status, and zone info.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        bucket_name: { type: "string", description: "Name of the R2 bucket" },
+      },
+      required: ["bucket_name"],
+    },
+  },
+  {
+    name: "cloudflare_r2_bucket_domain_add",
+    description: "Attach a custom domain to an R2 bucket, enabling public access via that domain. The domain must belong to a zone in the same account. Cloudflare automatically creates a CNAME record.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        bucket_name: { type: "string", description: "Name of the R2 bucket" },
+        domain: { type: "string", description: "Custom domain to attach (e.g., assets.example.com)" },
+      },
+      required: ["bucket_name", "domain"],
+    },
+  },
+  {
+    name: "cloudflare_r2_bucket_domain_remove",
+    description: "Remove a custom domain from an R2 bucket. This disables public access via that domain.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        bucket_name: { type: "string", description: "Name of the R2 bucket" },
+        domain: { type: "string", description: "Custom domain to remove" },
+      },
+      required: ["bucket_name", "domain"],
+    },
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -243,6 +292,34 @@ export async function handleR2Tool(
         const accountId = requireAccountId(client);
         const result = await client.delete(
           `/accounts/${accountId}/r2/buckets/${parsed.bucket_name}/objects/${parsed.object_key}`,
+        );
+        return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
+      }
+
+      case "cloudflare_r2_bucket_domain_list": {
+        const parsed = R2BucketDomainListSchema.parse(args);
+        const accountId = requireAccountId(client);
+        const result = await client.get(
+          `/accounts/${accountId}/r2/buckets/${parsed.bucket_name}/domains`,
+        );
+        return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
+      }
+
+      case "cloudflare_r2_bucket_domain_add": {
+        const parsed = R2BucketDomainAddSchema.parse(args);
+        const accountId = requireAccountId(client);
+        const result = await client.put(
+          `/accounts/${accountId}/r2/buckets/${parsed.bucket_name}/domains`,
+          { domain: parsed.domain },
+        );
+        return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
+      }
+
+      case "cloudflare_r2_bucket_domain_remove": {
+        const parsed = R2BucketDomainRemoveSchema.parse(args);
+        const accountId = requireAccountId(client);
+        const result = await client.delete(
+          `/accounts/${accountId}/r2/buckets/${parsed.bucket_name}/domains/${parsed.domain}`,
         );
         return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
       }

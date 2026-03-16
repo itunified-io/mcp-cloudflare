@@ -52,6 +52,22 @@ Manage R2 object storage buckets and objects using Cloudflare API.
 3. Call `cloudflare_r2_bucket_delete` with `bucket_name`
 4. Always ask for user confirmation before executing
 
+### Enable public access via custom domain
+1. Call `cloudflare_r2_bucket_domain_add` with `bucket_name` and `domain`
+2. The domain must belong to a Cloudflare zone in the same account
+3. Cloudflare automatically creates a CNAME DNS record for the domain
+4. Bucket becomes publicly readable at `https://<domain>/`
+5. Writes still require API authentication — public = read-only
+
+### List custom domains on a bucket
+1. Call `cloudflare_r2_bucket_domain_list` with `bucket_name`
+2. Returns domain names, status (active/pending), and zone info
+
+### Remove a custom domain
+1. Call `cloudflare_r2_bucket_domain_remove` with `bucket_name` and `domain`
+2. This disables public access via that domain
+3. Confirm before removing — may break live websites referencing the domain
+
 ### R2 Bucket Audit
 1. Call `cloudflare_r2_bucket_list` to get all buckets
 2. For each bucket, call `cloudflare_r2_bucket_get` for details
@@ -67,6 +83,9 @@ Manage R2 object storage buckets and objects using Cloudflare API.
 - `cloudflare_r2_object_list` — List objects with prefix/delimiter filtering
 - `cloudflare_r2_object_get` — Get object metadata (size, type, etag)
 - `cloudflare_r2_object_delete` — Delete an object from a bucket
+- `cloudflare_r2_bucket_domain_list` — List custom domains attached to a bucket
+- `cloudflare_r2_bucket_domain_add` — Attach a custom domain (enables public read access)
+- `cloudflare_r2_bucket_domain_remove` — Remove a custom domain from a bucket
 
 ## Naming Convention (ADR-0035)
 
