@@ -18,6 +18,7 @@ import { workersToolDefinitions, handleWorkersTool } from './tools/workers.js';
 import { workerSecretsToolDefinitions, handleWorkerSecretsTool } from './tools/worker-secrets.js';
 import { workerAnalyticsToolDefinitions, handleWorkerAnalyticsTool } from './tools/worker-analytics.js';
 import { webAnalyticsToolDefinitions, handleWebAnalyticsTool } from './tools/web-analytics.js';
+import { r2ToolDefinitions, handleR2Tool } from './tools/r2.js';
 
 const allToolDefinitions: Tool[] = ([
   ...zonesToolDefinitions,
@@ -32,6 +33,7 @@ const allToolDefinitions: Tool[] = ([
   ...workerSecretsToolDefinitions,
   ...workerAnalyticsToolDefinitions,
   ...webAnalyticsToolDefinitions,
+  ...r2ToolDefinitions,
 ] as unknown) as Tool[];
 
 const toolHandlers = new Map<
@@ -51,9 +53,10 @@ for (const def of workersToolDefinitions) toolHandlers.set(def.name, handleWorke
 for (const def of workerSecretsToolDefinitions) toolHandlers.set(def.name, handleWorkerSecretsTool);
 for (const def of workerAnalyticsToolDefinitions) toolHandlers.set(def.name, handleWorkerAnalyticsTool);
 for (const def of webAnalyticsToolDefinitions) toolHandlers.set(def.name, handleWebAnalyticsTool);
+for (const def of r2ToolDefinitions) toolHandlers.set(def.name, handleR2Tool);
 
 const server = new Server(
-  { name: 'mcp-cloudflare', version: '2026.3.16.6' },
+  { name: 'mcp-cloudflare', version: '2026.3.16.7' },
   { capabilities: { tools: {} } }
 );
 

@@ -116,3 +116,28 @@ export const KvKeySchema = z
   .string()
   .min(1, "KV key is required")
   .max(512, "KV key must be 512 characters or less");
+
+/** R2 bucket name — 3-63 chars, lowercase alphanumeric and hyphens */
+export const R2BucketNameSchema = z
+  .string()
+  .min(3, "Bucket name must be at least 3 characters")
+  .max(63, "Bucket name must be 63 characters or less")
+  .regex(
+    /^[a-z0-9][a-z0-9-]*[a-z0-9]$/,
+    "Bucket name must be lowercase alphanumeric with hyphens, cannot start or end with hyphen",
+  );
+
+/** R2 object key — the path/name of an object in a bucket */
+export const R2ObjectKeySchema = z
+  .string()
+  .min(1, "Object key is required")
+  .max(1024, "Object key must be 1024 characters or less");
+
+/** R2 location hint for bucket creation */
+export const R2LocationHintSchema = z.enum([
+  "apac",
+  "eeur",
+  "enam",
+  "weur",
+  "wnam",
+]);
