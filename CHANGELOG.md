@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 This project uses [Calendar Versioning](https://calver.org/) (`YYYY.MM.DD.TS`).
 
 
+## v2026.03.16.10
+
+- **Fix R2 custom domain API path and HTTP method** (#47)
+  - Correct path: `/domains/custom` (not `/custom_domains`)
+  - Correct method: POST for add (not PUT)
+  - Verified against CF API docs
+
 ## v2026.03.16.9
 
 - **Fix R2 custom domain API path** (#47)

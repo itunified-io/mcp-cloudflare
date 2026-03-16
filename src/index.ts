@@ -56,7 +56,7 @@ for (const def of webAnalyticsToolDefinitions) toolHandlers.set(def.name, handle
 for (const def of r2ToolDefinitions) toolHandlers.set(def.name, handleR2Tool);
 
 const server = new Server(
-  { name: 'mcp-cloudflare', version: '2026.3.16.9' },
+  { name: 'mcp-cloudflare', version: '2026.3.16.10' },
   { capabilities: { tools: {} } }
 );
 

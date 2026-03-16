@@ -349,7 +349,7 @@ describe('handleR2Tool', () => {
 
       expect(result.content[0].text).toContain('assets.example.com');
       expect(client.get).toHaveBeenCalledWith(
-        `/accounts/${ACCOUNT_ID}/r2/buckets/assets-itunified-de/custom_domains`,
+        `/accounts/${ACCOUNT_ID}/r2/buckets/assets-itunified-de/domains/custom`,
       );
     });
   });
@@ -357,7 +357,7 @@ describe('handleR2Tool', () => {
   describe('cloudflare_r2_bucket_domain_add', () => {
     it('attaches a custom domain to a bucket', async () => {
       const mockResult = { domain: 'assets.example.com', status: 'pending' };
-      const client = mockClient({ put: vi.fn().mockResolvedValue(mockResult) });
+      const client = mockClient({ post: vi.fn().mockResolvedValue(mockResult) });
 
       const result = await handleR2Tool(
         'cloudflare_r2_bucket_domain_add',
@@ -366,8 +366,8 @@ describe('handleR2Tool', () => {
       );
 
       expect(result.content[0].text).toContain('assets.example.com');
-      expect(client.put).toHaveBeenCalledWith(
-        `/accounts/${ACCOUNT_ID}/r2/buckets/assets-itunified-de/custom_domains`,
+      expect(client.post).toHaveBeenCalledWith(
+        `/accounts/${ACCOUNT_ID}/r2/buckets/assets-itunified-de/domains/custom`,
         { domain: 'assets.example.com' },
       );
     });
@@ -396,7 +396,7 @@ describe('handleR2Tool', () => {
       );
 
       expect(client.delete).toHaveBeenCalledWith(
-        `/accounts/${ACCOUNT_ID}/r2/buckets/assets-itunified-de/custom_domains/assets.example.com`,
+        `/accounts/${ACCOUNT_ID}/r2/buckets/assets-itunified-de/domains/custom/assets.example.com`,
       );
     });
   });
