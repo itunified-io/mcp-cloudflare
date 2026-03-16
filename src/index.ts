@@ -50,7 +50,7 @@ for (const def of workerSecretsToolDefinitions) toolHandlers.set(def.name, handl
 for (const def of workerAnalyticsToolDefinitions) toolHandlers.set(def.name, handleWorkerAnalyticsTool);
 
 const server = new Server(
-  { name: 'mcp-cloudflare', version: '2026.3.13' },
+  { name: 'mcp-cloudflare', version: '2026.3.16' },
   { capabilities: { tools: {} } }
 );
 
