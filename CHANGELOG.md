@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 This project uses [Calendar Versioning](https://calver.org/) (`YYYY.MM.DD.TS`).
 
 
+## v2026.03.16.7
+
+- **Add R2 storage management tools** (#43)
+  - 7 new tools: `cloudflare_r2_bucket_list`, `cloudflare_r2_bucket_create`, `cloudflare_r2_bucket_get`, `cloudflare_r2_bucket_delete`, `cloudflare_r2_object_list`, `cloudflare_r2_object_get`, `cloudflare_r2_object_delete`
+  - Bucket CRUD via REST API (`/accounts/{id}/r2/buckets`)
+  - Object listing and metadata via REST API (`/accounts/{id}/r2/buckets/{name}/objects`)
+  - Zod validation schemas: `R2BucketNameSchema`, `R2ObjectKeySchema`, `R2LocationHintSchema`
+  - 24 unit tests covering all tools, validation errors, and API error handling
+  - New skill: `cloudflare-r2-manage` — R2 bucket and object management workflows
+
 ## v2026.03.16.6
 
 - **Add Web Analytics (RUM) tools** (#41)

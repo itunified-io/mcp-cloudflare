@@ -25,7 +25,7 @@ Slim Cloudflare MCP Server for managing DNS, zones, tunnels, WAF, Zero Trust, an
 
 ## Features
 
-60 tools across 10 domains:
+67 tools across 11 domains:
 
 - **DNS** — Record management (A, AAAA, CNAME, MX, TXT, SRV, CAA, NS), batch operations
 - **Zones** — Zone listing, settings, SSL/TLS configuration, cache management
@@ -37,6 +37,7 @@ Slim Cloudflare MCP Server for managing DNS, zones, tunnels, WAF, Zero Trust, an
 - **Workers** — Script deployment, route management
 - **Worker Secrets** — Secret management (names only, values never exposed)
 - **Worker Analytics** — Invocation metrics, CPU time, error rates via GraphQL
+- **R2 Storage** — Bucket management, object listing and metadata, location hints
 
 ## Quick Start
 
@@ -86,6 +87,7 @@ Create an API Token at `dash.cloudflare.com/profile/api-tokens` with the followi
 - **Security events**: Zone > Analytics > Read
 - **Workers KV**: Account > Workers KV Storage > Edit
 - **Workers**: Account > Worker Scripts > Edit
+- **R2**: Account > R2 Storage > Edit
 
 ## Multi-Zone Support
 
@@ -116,6 +118,7 @@ Claude Code skills compose MCP tools into higher-level workflows. See [`.claude/
 | cloudflare-zero-trust | — | Zero Trust — access apps, policies, identity providers, gateway |
 | cloudflare-kv-manage | — | Workers KV — namespace and key-value CRUD operations |
 | cloudflare-worker-deploy | — | Workers — script deployment, routes, secrets, analytics |
+| cloudflare-r2-manage | — | R2 Storage — bucket and object management, audit workflows |
 
 ## Development
 

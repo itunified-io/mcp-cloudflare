@@ -20,6 +20,7 @@ Claude Code skills compose multiple MCP tools into higher-level workflows. Skill
 | cloudflare-zero-trust | Auto | — | Zero Trust — access apps, policies, identity providers, gateway |
 | cloudflare-kv-manage | Auto | — | Workers KV — namespace and key-value CRUD operations |
 | cloudflare-worker-deploy | Auto | — | Workers — script deployment, routes, secrets, analytics |
+| cloudflare-r2-manage | Auto | — | R2 Storage — bucket and object management, audit workflows |
 
 ---
 
@@ -204,3 +205,21 @@ Claude Code skills compose multiple MCP tools into higher-level workflows. Skill
 - `cloudflare_worker_usage` — Per-script aggregated usage
 
 **Triggers:** User asks to deploy workers, manage worker routes or secrets, or view worker analytics.
+
+---
+
+### cloudflare-r2-manage
+
+**Type:** Auto-invocable
+**Description:** Manages Cloudflare R2 object storage buckets and objects. Covers creating buckets with location hints, listing objects with prefix filtering, inspecting object metadata, and deleting buckets and objects. Includes audit workflow for bucket inventory.
+
+**Tools used:**
+- `cloudflare_r2_bucket_list` — List all R2 buckets with optional name filter
+- `cloudflare_r2_bucket_create` — Create a new bucket with optional location hint
+- `cloudflare_r2_bucket_get` — Get bucket details (creation date, location)
+- `cloudflare_r2_bucket_delete` — Delete an empty bucket (destructive)
+- `cloudflare_r2_object_list` — List objects with prefix/delimiter filtering
+- `cloudflare_r2_object_get` — Get object metadata (size, type, etag)
+- `cloudflare_r2_object_delete` — Delete an object from a bucket
+
+**Triggers:** User asks to manage R2 buckets, list objects, or audit R2 storage.

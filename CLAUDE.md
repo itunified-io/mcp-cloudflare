@@ -36,6 +36,7 @@ src/
     waf.ts                   # WAF ruleset and custom rule tools
     zerotrust.ts             # Zero Trust Access and Gateway tools
     security.ts              # Security events, IP access rules, DDoS tools
+    r2.ts                    # R2 bucket and object management tools
   utils/
     validation.ts            # Shared Zod schemas (zone IDs, record types, etc.)
     errors.ts                # Cloudflare error extraction and CloudflareApiError
