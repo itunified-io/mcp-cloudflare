@@ -181,9 +181,21 @@ All Slack messages must include:
 
 ---
 
-### Phase 5 — GitHub Issue Creation for Critical Findings
+### Phase 5 — Issue Creation for Critical Findings
 
-For each **critical** Security Center insight (not dismissed), auto-create a GitHub issue in the `itunified-io/infrastructure` repo:
+Issue creation backend is configurable (set during setup wizard or in config):
+
+| Backend | Description | Duplicate Check |
+|---------|-------------|-----------------|
+| **Dashboard** (default) | Store in local SQLite, display in Grafana "Security Issues" panel | Query SQLite by subject + status=open |
+| **GitHub** | `gh issue create` with labels in configured repo | `gh issue list --search "<subject>"` |
+| **Jira** | Create via Atlassian MCP (`createJiraIssue`) in configured project | JQL search by summary |
+
+The active backend is determined by the `ISSUE_BACKEND` config value (`dashboard`, `github`, `jira`).
+
+#### GitHub Backend
+
+For each **critical** Security Center insight (not dismissed), auto-create a GitHub issue in the configured repo:
 
 1. **Duplicate check**: Search for existing open issues matching the insight subject:
    ```
@@ -218,6 +230,23 @@ For each **critical** Security Center insight (not dismissed), auto-create a Git
      ```
 
 3. **Slack notification**: Include the newly created GH issue URL(s) in the `#infra-alerts` message alongside the severity summary.
+
+#### Jira Backend
+
+For each **critical** finding, create a Jira issue via Atlassian MCP:
+
+1. **Duplicate check**: `searchJiraIssuesUsingJql` with `summary ~ "<subject>" AND status != Done`
+2. **Create issue** if no duplicate: `createJiraIssue` with configured project key, issue type `Bug`, priority `High`
+3. **Slack notification**: Include Jira issue key and URL in alerts.
+
+#### Dashboard Backend (Default)
+
+For each finding (WARNING + CRITICAL), store in local SQLite:
+
+1. **Duplicate check**: Query `issues` table where `subject = "<subject>" AND status = "open"`
+2. **Insert** if no duplicate: `INSERT INTO issues (subject, issue_type, severity, since, payload, status, created_at)`
+3. **Grafana panel**: Pre-provisioned "Security Issues" panel reads from SQLite via JSON API datasource
+4. No external system required — works out of the box with the Docker stack.
 
 ---
 
