@@ -281,7 +281,7 @@ describe('handleDnsTool', () => {
       }, client);
 
       expect(result.content[0].text).toContain('mail.example.com');
-      expect(client.get).toHaveBeenCalledWith(`/zones/${ZONE_ID}/dns_records`, { name: 'mail' });
+      expect(client.get).toHaveBeenCalledWith(`/zones/${ZONE_ID}/dns_records`, { per_page: 5000 });
     });
 
     it('passes type filter when provided', async () => {
@@ -293,7 +293,7 @@ describe('handleDnsTool', () => {
         type: 'MX',
       }, client);
 
-      expect(client.get).toHaveBeenCalledWith(`/zones/${ZONE_ID}/dns_records`, { name: 'mail', type: 'MX' });
+      expect(client.get).toHaveBeenCalledWith(`/zones/${ZONE_ID}/dns_records`, { per_page: 5000, type: 'MX' });
     });
   });
 
