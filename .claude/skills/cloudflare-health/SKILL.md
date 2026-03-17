@@ -28,6 +28,11 @@ Once zones are returned, for **each zone in parallel**:
 - `cloudflare_waf_list_rulesets` — list active WAF rulesets
 - `cloudflare_dns_list` — get DNS record count (can use a count/summary call if available)
 - `cloudflare_dnssec_status` — DNSSEC enabled status
+- `cloudflare_ssl_setting_get` — current SSL/TLS encryption mode
+- `cloudflare_tls_setting_get` — minimum TLS version
+- `cloudflare_certificate_list` — certificate packs (check expiry)
+- `cloudflare_ssl_verification` — SSL verification status
+- `cloudflare_rate_limit_list` — rate limiting rules configured
 
 If `cloudflare_security_insights_severity_count` returns any `critical` count > 0:
 - `cloudflare_security_insights` with `severity=critical` — fetch details of critical findings
@@ -78,6 +83,22 @@ Produce a structured dashboard with the following sections:
 
 ---
 
+**🔐 SSL/TLS**
+
+| Zone | SSL Mode | Min TLS | Cert Status | Nearest Expiry | Verification |
+|------|----------|---------|-------------|----------------|--------------|
+| example.com | strict | 1.2 | active | 2026-06-15 (90d) | passed |
+
+---
+
+**⏱️ Rate Limiting**
+
+| Zone | Rules | Enabled | Disabled | Actions |
+|------|-------|---------|----------|---------|
+| example.com | 3 | 2 | 1 | ban: 2, challenge: 1 |
+
+---
+
 **⚡ API Health**
 
 - Token: valid / invalid
@@ -123,6 +144,11 @@ Evaluate all collected data and assign an overall severity level:
 - DNSSEC is disabled on a zone where it was previously enabled
 - A zone has fewer WAF rulesets than expected
 - One or more `moderate` Security Center insights are active (not dismissed)
+- SSL/TLS mode is `flexible` (not end-to-end encrypted)
+- Minimum TLS version is `1.2` (acceptable but not optimal)
+- Any SSL certificate expires within 30 days
+- A production zone has zero rate limiting rules
+- SSL verification has pending or failed checks
 
 **🔴 CRITICAL** — Any of the following:
 - One or more zones have status other than `active`
@@ -130,6 +156,10 @@ Evaluate all collected data and assign an overall severity level:
 - API token is invalid or expired
 - API rate limit usage is above 95%
 - One or more `critical` Security Center insights are active (not dismissed)
+- SSL/TLS mode is `off` or `flexible` on a production zone
+- Minimum TLS version is below `1.2`
+- Any SSL certificate expires within 7 days or has expired
+- SSL verification has failed for any hostname
 
 Display the overall severity prominently at the top of the report.
 
@@ -215,3 +245,8 @@ For each **critical** Security Center insight (not dismissed), auto-create a Git
 - `cloudflare_rate_limit_status` — API rate limit consumption
 - `cloudflare_security_insights_severity_count` — Security Center insight severity overview
 - `cloudflare_security_insights` — detailed Security Center findings (filtered by severity)
+- `cloudflare_ssl_setting_get` — SSL/TLS encryption mode per zone
+- `cloudflare_tls_setting_get` — minimum TLS version per zone
+- `cloudflare_certificate_list` — certificate packs with expiry dates
+- `cloudflare_ssl_verification` — SSL verification status per zone
+- `cloudflare_rate_limit_list` — rate limiting rules per zone
