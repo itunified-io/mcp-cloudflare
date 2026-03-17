@@ -11,6 +11,8 @@ Slim Cloudflare MCP Server for managing DNS, zones, tunnels, WAF, Zero Trust, an
 
 **No SSH. No shell execution. API-only. 3 runtime dependencies.**
 
+[![mcp-cloudflare MCP server](https://glama.ai/mcp/servers/itunified-io/mcp-cloudflare/badges/card.svg)](https://glama.ai/mcp/servers/itunified-io/mcp-cloudflare)
+
 ## Table of Contents
 
 - [Features](#features)
