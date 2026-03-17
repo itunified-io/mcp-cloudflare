@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 This project uses [Calendar Versioning](https://calver.org/) (`YYYY.MM.DD.TS`).
 
 
+## v2026.03.17.1
+
+- **feat: add Security Center insights tools** (#51)
+  - `cloudflare_security_insights` — list Security Center findings with severity/type/dismissed filters
+  - `cloudflare_security_insights_severity_count` — severity counts overview (low/moderate/critical)
+  - Account-level API: `GET /accounts/{id}/security-center/insights`
+  - Added `SecurityInsight` type definitions
+- **feat: update `/cf-health` skill with Security Center integration** (#51)
+  - Phase 1: gather Security Center severity counts in parallel
+  - Phase 2: new Security Center Insights dashboard section
+  - Phase 3: critical insights → CRITICAL severity, moderate → WARNING
+  - Phase 5 (new): auto-create GitHub issues for critical findings with duplicate prevention
+  - Slack #infra-alerts includes GH issue links for critical findings
+
 ## v2026.03.16.11
 
 - **Fix R2 domain_add: include zoneId in request body** (#47)

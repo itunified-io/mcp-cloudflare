@@ -4,6 +4,7 @@ import type { CloudflareClient } from '../../src/client/cloudflare-client.js';
 
 const ZONE_ID = '00000000000000000000000000000001';
 const RULE_ID = '00000000000000000000000000000002';
+const ACCOUNT_ID = '00000000000000000000000000000003';
 
 function mockClient(overrides: Partial<CloudflareClient> = {}): CloudflareClient {
   return {
@@ -27,8 +28,8 @@ function mockClient(overrides: Partial<CloudflareClient> = {}): CloudflareClient
 // ---------------------------------------------------------------------------
 
 describe('Security Tool Definitions', () => {
-  it('exports 8 tool definitions', () => {
-    expect(securityToolDefinitions).toHaveLength(8);
+  it('exports 10 tool definitions', () => {
+    expect(securityToolDefinitions).toHaveLength(10);
   });
 
   it('all tools have cloudflare_security_, cloudflare_ddos_, cloudflare_ip_access_, or cloudflare_under_attack_ prefix', () => {
@@ -417,6 +418,107 @@ describe('handleSecurityTool', () => {
 
       const parsed = JSON.parse(result.content[0].text) as Record<string, unknown>;
       expect(parsed['zone_id']).toBe(ZONE_ID);
+    });
+  });
+
+  describe('cloudflare_security_insights', () => {
+    it('lists security insights for the account', async () => {
+      const mockResponse = {
+        count: 2,
+        issues: [
+          { id: 'insight-1', severity: 'critical', issue_type: 'exposed_infrastructure', subject: 'example.com' },
+          { id: 'insight-2', severity: 'low', issue_type: 'email_security', subject: 'example.com' },
+        ],
+        page: 1,
+        per_page: 25,
+      };
+      const client = mockClient({
+        get: vi.fn().mockResolvedValue(mockResponse),
+        getAccountId: vi.fn().mockReturnValue(ACCOUNT_ID),
+      });
+
+      const result = await handleSecurityTool('cloudflare_security_insights', {}, client);
+
+      expect(result.content[0].text).toContain('critical');
+      expect(client.get).toHaveBeenCalledWith(
+        `/accounts/${ACCOUNT_ID}/security-center/insights`,
+        {},
+      );
+    });
+
+    it('passes severity filter to API', async () => {
+      const client = mockClient({
+        get: vi.fn().mockResolvedValue({ count: 0, issues: [] }),
+        getAccountId: vi.fn().mockReturnValue(ACCOUNT_ID),
+      });
+
+      await handleSecurityTool(
+        'cloudflare_security_insights',
+        { severity: 'critical', page: 1, per_page: 50 },
+        client,
+      );
+
+      expect(client.get).toHaveBeenCalledWith(
+        `/accounts/${ACCOUNT_ID}/security-center/insights`,
+        { severity: 'critical', page: 1, per_page: 50 },
+      );
+    });
+
+    it('requires CLOUDFLARE_ACCOUNT_ID', async () => {
+      const client = mockClient();
+
+      const result = await handleSecurityTool('cloudflare_security_insights', {}, client);
+
+      expect(result.content[0].text).toContain('CLOUDFLARE_ACCOUNT_ID');
+    });
+
+    it('rejects invalid severity value', async () => {
+      const client = mockClient({ getAccountId: vi.fn().mockReturnValue(ACCOUNT_ID) });
+
+      const result = await handleSecurityTool(
+        'cloudflare_security_insights',
+        { severity: 'high' },
+        client,
+      );
+
+      expect(result.content[0].text).toContain('Error executing cloudflare_security_insights');
+    });
+  });
+
+  describe('cloudflare_security_insights_severity_count', () => {
+    it('returns severity counts', async () => {
+      const mockCounts = [
+        { count: 2, value: 'critical' },
+        { count: 3, value: 'moderate' },
+        { count: 5, value: 'low' },
+      ];
+      const client = mockClient({
+        get: vi.fn().mockResolvedValue(mockCounts),
+        getAccountId: vi.fn().mockReturnValue(ACCOUNT_ID),
+      });
+
+      const result = await handleSecurityTool(
+        'cloudflare_security_insights_severity_count',
+        {},
+        client,
+      );
+
+      expect(result.content[0].text).toContain('critical');
+      expect(client.get).toHaveBeenCalledWith(
+        `/accounts/${ACCOUNT_ID}/security-center/insights/severity`,
+      );
+    });
+
+    it('requires CLOUDFLARE_ACCOUNT_ID', async () => {
+      const client = mockClient();
+
+      const result = await handleSecurityTool(
+        'cloudflare_security_insights_severity_count',
+        {},
+        client,
+      );
+
+      expect(result.content[0].text).toContain('CLOUDFLARE_ACCOUNT_ID');
     });
   });
 

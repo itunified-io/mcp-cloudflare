@@ -261,6 +261,27 @@ export interface IpAccessRule {
   modified_on: string;
 }
 
+// Security Center types
+
+export interface SecurityInsight {
+  id: string;
+  dismissed: boolean;
+  issue_class: string;
+  issue_type: string;
+  payload: Record<string, unknown>;
+  resolve_link: string;
+  resolve_text: string;
+  severity: "low" | "moderate" | "critical";
+  since: string;
+  subject: string;
+  timestamp: string;
+}
+
+export interface SecurityInsightSeverityCount {
+  count: number;
+  value: string;
+}
+
 // Workers KV types
 
 export interface KvNamespace {

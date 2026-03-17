@@ -55,6 +55,18 @@ const UnderAttackStatusSchema = z.object({
   zone_id: ZoneNameOrIdSchema,
 });
 
+const SecurityInsightsSchema = z.object({
+  severity: z.enum(["low", "moderate", "critical"]).optional(),
+  issue_type: z
+    .enum(["compliance_violation", "email_security", "exposed_infrastructure"])
+    .optional(),
+  dismissed: z.boolean().optional(),
+  page: z.number().int().min(1).optional(),
+  per_page: z.number().int().min(1).max(1000).optional(),
+});
+
+const SecurityInsightsSeverityCountSchema = z.object({});
+
 // ---------------------------------------------------------------------------
 // GraphQL query templates
 // ---------------------------------------------------------------------------
@@ -102,6 +114,20 @@ query DdosAnalytics($zoneTag: string!, $since: Time!, $limit: Int!) {
   }
 }
 `.trim();
+
+// ---------------------------------------------------------------------------
+// Account ID helper
+// ---------------------------------------------------------------------------
+
+function requireAccountId(client: CloudflareClient): string {
+  const accountId = client.getAccountId();
+  if (!accountId) {
+    throw new Error(
+      "CLOUDFLARE_ACCOUNT_ID environment variable is required for Security Center operations",
+    );
+  }
+  return accountId;
+}
 
 // ---------------------------------------------------------------------------
 // Tool definitions (for ListTools)
@@ -280,6 +306,49 @@ export const securityToolDefinitions = [
       required: ["zone_id"],
     },
   },
+  {
+    name: "cloudflare_security_insights",
+    description:
+      "List Security Center insights (configuration issues, vulnerabilities, misconfigurations) for the account. Requires CLOUDFLARE_ACCOUNT_ID.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        severity: {
+          type: "string",
+          enum: ["low", "moderate", "critical"],
+          description: "Filter by severity level",
+        },
+        issue_type: {
+          type: "string",
+          enum: [
+            "compliance_violation",
+            "email_security",
+            "exposed_infrastructure",
+          ],
+          description: "Filter by issue type",
+        },
+        dismissed: {
+          type: "boolean",
+          description:
+            "Filter by dismissed status (default: false = active only)",
+        },
+        page: { type: "number", description: "Page number (default: 1)" },
+        per_page: {
+          type: "number",
+          description: "Results per page, max 1000 (default: 25)",
+        },
+      },
+    },
+  },
+  {
+    name: "cloudflare_security_insights_severity_count",
+    description:
+      "Get Security Center insight counts grouped by severity (low, moderate, critical). Quick overview without fetching all issues. Requires CLOUDFLARE_ACCOUNT_ID.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {},
+    },
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -392,6 +461,38 @@ export async function handleSecurityTool(
           modified_on: result.modified_on,
         };
         return { content: [{ type: "text", text: JSON.stringify(status, null, 2) }] };
+      }
+
+      case "cloudflare_security_insights": {
+        const parsed = SecurityInsightsSchema.parse(args);
+        const accountId = requireAccountId(client);
+        const params: Record<string, unknown> = {};
+        if (parsed.severity !== undefined) params["severity"] = parsed.severity;
+        if (parsed.issue_type !== undefined)
+          params["issue_type"] = parsed.issue_type;
+        if (parsed.dismissed !== undefined)
+          params["dismissed"] = parsed.dismissed;
+        if (parsed.page !== undefined) params["page"] = parsed.page;
+        if (parsed.per_page !== undefined)
+          params["per_page"] = parsed.per_page;
+        const result = await client.get(
+          `/accounts/${accountId}/security-center/insights`,
+          params,
+        );
+        return {
+          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        };
+      }
+
+      case "cloudflare_security_insights_severity_count": {
+        SecurityInsightsSeverityCountSchema.parse(args);
+        const accountId = requireAccountId(client);
+        const result = await client.get(
+          `/accounts/${accountId}/security-center/insights/severity`,
+        );
+        return {
+          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        };
       }
 
       default:
