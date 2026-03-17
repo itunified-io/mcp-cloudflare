@@ -1,6 +1,6 @@
 {
   "name": "@itunified.io/mcp-cloudflare",
-  "version": "2026.3.17.3",
+  "version": "2026.3.17.4",
   "description": "Slim Cloudflare MCP Server — DNS, Zones, Tunnels, WAF, Zero Trust, Security management via Cloudflare API v4",
   "type": "module",
   "main": "dist/index.js",

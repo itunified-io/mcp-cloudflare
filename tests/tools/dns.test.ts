@@ -27,8 +27,8 @@ function mockClient(overrides: Partial<CloudflareClient> = {}): CloudflareClient
 // ---------------------------------------------------------------------------
 
 describe('DNS Tool Definitions', () => {
-  it('exports 9 tool definitions', () => {
-    expect(dnsToolDefinitions).toHaveLength(9);
+  it('exports 11 tool definitions', () => {
+    expect(dnsToolDefinitions).toHaveLength(11);
   });
 
   it('all tools have cloudflare_dns_ or cloudflare_dnssec_ prefix', () => {
@@ -352,6 +352,30 @@ describe('handleDnsTool', () => {
 
       expect(result.content[0].text).toContain('active');
       expect(client.get).toHaveBeenCalledWith(`/zones/${ZONE_ID}/dnssec`);
+    });
+  });
+
+  describe('cloudflare_dnssec_enable', () => {
+    it('enables DNSSEC for a zone', async () => {
+      const enableResult = { status: 'pending', ds: 'example.com. 3600 IN DS 2371 13 2 ...' };
+      const client = mockClient({ post: vi.fn().mockResolvedValue(enableResult) });
+
+      const result = await handleDnsTool('cloudflare_dnssec_enable', { zone_id: ZONE_ID }, client);
+
+      expect(result.content[0].text).toContain('pending');
+      expect(client.post).toHaveBeenCalledWith(`/zones/${ZONE_ID}/dnssec`, {});
+    });
+  });
+
+  describe('cloudflare_dnssec_disable', () => {
+    it('disables DNSSEC for a zone', async () => {
+      const disableResult = { status: 'disabled' };
+      const client = mockClient({ patch: vi.fn().mockResolvedValue(disableResult) });
+
+      const result = await handleDnsTool('cloudflare_dnssec_disable', { zone_id: ZONE_ID }, client);
+
+      expect(result.content[0].text).toContain('disabled');
+      expect(client.patch).toHaveBeenCalledWith(`/zones/${ZONE_ID}/dnssec`, { status: 'disabled' });
     });
   });
 

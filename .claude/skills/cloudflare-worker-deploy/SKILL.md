@@ -39,6 +39,24 @@ Deploy Workers scripts, configure routes, manage secrets, and monitor analytics.
 3. Call `cloudflare_worker_secret_delete` to remove a secret
 4. **Security:** Secret values are sent securely and never echoed in responses
 
+### Set Slack webhook for contact forms
+Workers with contact forms can forward submissions to Slack via incoming webhooks.
+
+**Naming convention:** Local env vars use `SLACK_WH_<ZONE>` (dots replaced with underscores, uppercase). The Worker secret is always `SLACK_WEBHOOK_URL`.
+
+| Zone | Local env var | Worker secret name |
+|------|--------------|-------------------|
+| `example.com` | `SLACK_WH_EXAMPLE_COM` | `SLACK_WEBHOOK_URL` |
+| `example.de` | `SLACK_WH_EXAMPLE_DE` | `SLACK_WEBHOOK_URL` |
+
+**Workflow:**
+1. Create a Slack app with incoming webhooks enabled (use manifest from infrastructure repo)
+2. Store the webhook URL in your local secrets file
+3. Push to Workers via MCP:
+   - `cloudflare_worker_secret_set(script_name="<worker>-uat", secret_name="SLACK_WEBHOOK_URL", secret_value="<url>")`
+   - `cloudflare_worker_secret_set(script_name="<worker>-production", secret_name="SLACK_WEBHOOK_URL", secret_value="<url>")`
+4. Verify with `cloudflare_worker_secret_list(script_name="<worker>-uat")`
+
 ### View worker analytics
 1. Call `cloudflare_worker_analytics` for time-series metrics:
    - Requests, errors, subrequests per time interval
@@ -74,7 +92,15 @@ Deploy Workers scripts, configure routes, manage secrets, and monitor analytics.
 
 ## Deployment Workflow
 
-Recommended deployment sequence:
+### Multi-file project (wrangler.toml)
+Recommended sequence for projects with `wrangler.toml`:
+1. `cloudflare_worker_deploy_project(project_path, environment)` — Build and deploy
+2. Set secrets via MCP: `cloudflare_worker_secret_set(script_name, secret_name, secret_value)`
+3. Verify secrets: `cloudflare_worker_secret_list(script_name)`
+4. Verify deployment: `cloudflare_worker_analytics` or browser test
+
+### Single-file script (API upload)
+Recommended sequence:
 1. `cloudflare_worker_deploy` — Upload the script
 2. `cloudflare_worker_secret_set` — Set required secrets (API keys, tokens)
 3. `cloudflare_worker_route_create` — Configure URL routing

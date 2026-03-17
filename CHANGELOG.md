@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 This project uses [Calendar Versioning](https://calver.org/) (`YYYY.MM.DD.TS`).
 
 
+## v2026.03.17.4
+
+- **feat: DNSSEC write tools** (#96)
+  - `cloudflare_dnssec_enable` — enable DNSSEC for a zone (POST)
+  - `cloudflare_dnssec_disable` — disable DNSSEC for a zone (PATCH with status=disabled)
+
 ## v2026.03.17.3
 
 - **feat: SSL/TLS certificate management tools** (#89)

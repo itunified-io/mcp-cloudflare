@@ -67,6 +67,14 @@ const DnssecStatusSchema = z.object({
   zone_id: ZoneNameOrIdSchema,
 });
 
+const DnssecEnableSchema = z.object({
+  zone_id: ZoneNameOrIdSchema,
+});
+
+const DnssecDisableSchema = z.object({
+  zone_id: ZoneNameOrIdSchema,
+});
+
 // ---------------------------------------------------------------------------
 // Tool definitions (for ListTools)
 // ---------------------------------------------------------------------------
@@ -275,6 +283,34 @@ export const dnsToolDefinitions = [
       required: ["zone_id"],
     },
   },
+  {
+    name: "cloudflare_dnssec_enable",
+    description: "DESTRUCTIVE: Enable DNSSEC for a zone. After enabling, you must add the DS record at your domain registrar for DNSSEC to become fully active.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        zone_id: {
+          type: "string",
+          description: "Zone ID (32-char hex) or zone name (e.g., 'example.com')",
+        },
+      },
+      required: ["zone_id"],
+    },
+  },
+  {
+    name: "cloudflare_dnssec_disable",
+    description: "DESTRUCTIVE: Disable DNSSEC for a zone. Also remove the DS record at your domain registrar to avoid DNS resolution failures.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        zone_id: {
+          type: "string",
+          description: "Zone ID (32-char hex) or zone name (e.g., 'example.com')",
+        },
+      },
+      required: ["zone_id"],
+    },
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -388,6 +424,20 @@ export async function handleDnsTool(
         const parsed = DnssecStatusSchema.parse(args);
         const zoneId = await client.resolveZoneId(parsed.zone_id);
         const result = await client.get(`/zones/${zoneId}/dnssec`);
+        return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
+      }
+
+      case "cloudflare_dnssec_enable": {
+        const parsed = DnssecEnableSchema.parse(args);
+        const zoneId = await client.resolveZoneId(parsed.zone_id);
+        const result = await client.post(`/zones/${zoneId}/dnssec`, {});
+        return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
+      }
+
+      case "cloudflare_dnssec_disable": {
+        const parsed = DnssecDisableSchema.parse(args);
+        const zoneId = await client.resolveZoneId(parsed.zone_id);
+        const result = await client.patch(`/zones/${zoneId}/dnssec`, { status: "disabled" });
         return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
       }
 
