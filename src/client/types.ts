@@ -282,6 +282,40 @@ export interface SecurityInsightSeverityCount {
   value: string;
 }
 
+// SSL/TLS Certificate types
+
+export interface CertificatePack {
+  id: string;
+  type: string;
+  hosts: string[];
+  status: string;
+  validation_method: string;
+  validity_days: number;
+  certificate_authority: string;
+  certificates: Array<{
+    id?: string;
+    hosts: string[];
+    issuer: string;
+    signature: string;
+    status: string;
+    bundle_method: string;
+    expires_on: string;
+    uploaded_on?: string;
+  }>;
+  primary_certificate: string;
+  created_on: string;
+}
+
+export interface SslVerification {
+  certificate_status: string;
+  verification_type: string;
+  verification_status: boolean;
+  verification_info?: Record<string, unknown>;
+  brand_check: boolean;
+  cert_pack_uuid: string;
+  hostname: string;
+}
+
 // Workers KV types
 
 export interface KvNamespace {

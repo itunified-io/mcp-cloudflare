@@ -19,6 +19,8 @@ import { workerSecretsToolDefinitions, handleWorkerSecretsTool } from './tools/w
 import { workerAnalyticsToolDefinitions, handleWorkerAnalyticsTool } from './tools/worker-analytics.js';
 import { webAnalyticsToolDefinitions, handleWebAnalyticsTool } from './tools/web-analytics.js';
 import { r2ToolDefinitions, handleR2Tool } from './tools/r2.js';
+import { certificatesToolDefinitions, handleCertificatesTool } from './tools/certificates.js';
+import { ratelimitingToolDefinitions, handleRatelimitingTool } from './tools/ratelimiting.js';
 
 const allToolDefinitions: Tool[] = ([
   ...zonesToolDefinitions,
@@ -34,6 +36,8 @@ const allToolDefinitions: Tool[] = ([
   ...workerAnalyticsToolDefinitions,
   ...webAnalyticsToolDefinitions,
   ...r2ToolDefinitions,
+  ...certificatesToolDefinitions,
+  ...ratelimitingToolDefinitions,
 ] as unknown) as Tool[];
 
 const toolHandlers = new Map<
@@ -54,6 +58,8 @@ for (const def of workerSecretsToolDefinitions) toolHandlers.set(def.name, handl
 for (const def of workerAnalyticsToolDefinitions) toolHandlers.set(def.name, handleWorkerAnalyticsTool);
 for (const def of webAnalyticsToolDefinitions) toolHandlers.set(def.name, handleWebAnalyticsTool);
 for (const def of r2ToolDefinitions) toolHandlers.set(def.name, handleR2Tool);
+for (const def of certificatesToolDefinitions) toolHandlers.set(def.name, handleCertificatesTool);
+for (const def of ratelimitingToolDefinitions) toolHandlers.set(def.name, handleRatelimitingTool);
 
 const server = new Server(
   { name: 'mcp-cloudflare', version: '2026.3.16.11' },
