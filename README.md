@@ -25,14 +25,14 @@ Slim Cloudflare MCP Server for managing DNS, zones, tunnels, WAF, Zero Trust, an
 
 ## Features
 
-70 tools across 11 domains:
+72 tools across 11 domains:
 
 - **DNS** — Record management (A, AAAA, CNAME, MX, TXT, SRV, CAA, NS), batch operations
 - **Zones** — Zone listing, settings, SSL/TLS configuration, cache management
 - **Tunnels** — Cloudflare Tunnel creation, configuration, and ingress management
 - **WAF** — Ruleset management, custom firewall rules, rate limiting
 - **Zero Trust** — Access application CRUD, policies, identity providers, Gateway status
-- **Security** — Security event analytics, IP access rules, DDoS configuration
+- **Security** — Security event analytics, IP access rules, DDoS configuration, Security Center insights
 - **Workers KV** — Namespace management, key-value read/write/delete, key listing
 - **Workers** — Script deployment, route management
 - **Worker Secrets** — Secret management (names only, values never exposed)

@@ -41,6 +41,8 @@ Claude Code skills compose multiple MCP tools into higher-level workflows. Skill
 - `cloudflare_waf_list_rulesets` — WAF ruleset overview
 - `cloudflare_under_attack_status` — Under Attack Mode check
 - `cloudflare_rate_limit_status` — Rate limiting status
+- `cloudflare_security_insights_severity_count` — Security Center insight severity overview
+- `cloudflare_security_insights` — Security Center findings (filtered by severity)
 
 **Usage:** `/cf-health`
 
