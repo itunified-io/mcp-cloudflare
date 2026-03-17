@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 This project uses [Calendar Versioning](https://calver.org/) (`YYYY.MM.DD.TS`).
 
 
+## v2026.03.17.3
+
+- **feat: SSL/TLS certificate management tools** (#89)
+  - `cloudflare_certificate_list` — list certificate packs with status filter
+  - `cloudflare_certificate_get` — get specific certificate pack details
+  - `cloudflare_ssl_setting_get` / `cloudflare_ssl_setting_set` — SSL/TLS encryption mode (off/flexible/full/strict)
+  - `cloudflare_ssl_verification` — SSL verification status per zone
+  - `cloudflare_tls_setting_get` / `cloudflare_tls_setting_set` — minimum TLS version
+  - Added `CertificatePack` and `SslVerification` types
+- **feat: rate limiting read tools** (#90)
+  - `cloudflare_rate_limit_list` — list rate limiting rules with pagination
+  - `cloudflare_rate_limit_get` — get specific rate limit rule details
+  - `cloudflare_rate_limit_status` — summary with enabled/disabled/action breakdown
+- **feat: expand `/cf-health` with SSL/TLS + rate limiting checks** (#92)
+  - Phase 1: gather SSL settings, TLS version, certificate packs, rate limits per zone
+  - Phase 2: new SSL/TLS and Rate Limiting dashboard sections
+  - Phase 3: WARNING for flexible SSL, cert <30d, no rate limits; CRITICAL for off SSL, TLS <1.2, cert <7d
+- **feat: issue creation toggle route** (#93)
+  - Phase 5 now supports Dashboard (SQLite+Grafana), GitHub, and Jira backends
+  - Configured via `ISSUE_BACKEND` environment variable
+- **chore: npm scope renamed to `@itunified.io`**
+- **fix: dns_search tests updated for client-side filtering**
+- **docs: MCP tool placement review gate added to CLAUDE.md (ADR-0041)**
+
 ## v2026.03.17.1
 
 - **feat: add Security Center insights tools** (#51)
