@@ -59,6 +59,7 @@ docs/
 - Each tool has its own Zod input schema and clear description
 - Destructive operations require confirmation parameters
 - Zone-scoped tools require `zone_id` parameter (32-char hex or zone name — resolved automatically)
+- **Tool Placement Review Gate — MANDATORY**: Every new tool MUST have an approved placement (public or private repo) before implementation begins. The AI agent presents: tool name, recommended repo, and reasoning. Human approves before coding starts. See [ADR-0041](https://github.com/itunified-io/infrastructure/blob/main/docs/adr/0041-mcp-tool-placement-review-gate.md).
 
 ### Dependencies
 - **3 runtime dependencies only**: `@modelcontextprotocol/sdk`, `axios`, `zod`
