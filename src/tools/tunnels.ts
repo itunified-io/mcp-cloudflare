@@ -26,6 +26,10 @@ const TunnelDeleteSchema = z.object({
   tunnel_id: TunnelIdSchema,
 });
 
+const TunnelTokenSchema = z.object({
+  tunnel_id: TunnelIdSchema,
+});
+
 const TunnelConfigGetSchema = z.object({
   tunnel_id: TunnelIdSchema,
 });
@@ -112,6 +116,18 @@ export const tunnelsToolDefinitions = [
       type: "object" as const,
       properties: {
         tunnel_id: { type: "string", description: "Tunnel UUID to delete" },
+      },
+      required: ["tunnel_id"],
+    },
+  },
+  {
+    name: "cloudflare_tunnel_token",
+    description:
+      "Get the connector token for a Cloudflare Tunnel. This JWT token is used by cloudflared to authenticate with the Cloudflare edge. Store securely — treat as a credential.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        tunnel_id: { type: "string", description: "Tunnel UUID" },
       },
       required: ["tunnel_id"],
     },
@@ -219,6 +235,15 @@ export async function handleTunnelsTool(
         const accountId = requireAccountId(client);
         const result = await client.delete(
           `/accounts/${accountId}/cfd_tunnel/${parsed.tunnel_id}`,
+        );
+        return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
+      }
+
+      case "cloudflare_tunnel_token": {
+        const parsed = TunnelTokenSchema.parse(args);
+        const accountId = requireAccountId(client);
+        const result = await client.get(
+          `/accounts/${accountId}/cfd_tunnel/${parsed.tunnel_id}/token`,
         );
         return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
       }

@@ -27,8 +27,8 @@ function mockClient(overrides: Partial<CloudflareClient> = {}): CloudflareClient
 // ---------------------------------------------------------------------------
 
 describe('Tunnels Tool Definitions', () => {
-  it('exports 6 tool definitions', () => {
-    expect(tunnelsToolDefinitions).toHaveLength(6);
+  it('exports 7 tool definitions', () => {
+    expect(tunnelsToolDefinitions).toHaveLength(7);
   });
 
   it('all tools have cloudflare_tunnel_ prefix', () => {
@@ -179,6 +179,32 @@ describe('handleTunnelsTool', () => {
       expect(client.delete).toHaveBeenCalledWith(
         `/accounts/${ACCOUNT_ID}/cfd_tunnel/${TUNNEL_ID}`,
       );
+    });
+  });
+
+  describe('cloudflare_tunnel_token', () => {
+    it('gets the tunnel connector token', async () => {
+      const mockToken = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.test-token';
+      const client = mockClient({ get: vi.fn().mockResolvedValue(mockToken) });
+
+      const result = await handleTunnelsTool(
+        'cloudflare_tunnel_token',
+        { tunnel_id: TUNNEL_ID },
+        client,
+      );
+
+      expect(result.content[0].text).toContain('test-token');
+      expect(client.get).toHaveBeenCalledWith(
+        `/accounts/${ACCOUNT_ID}/cfd_tunnel/${TUNNEL_ID}/token`,
+      );
+    });
+
+    it('requires tunnel_id parameter', async () => {
+      const client = mockClient();
+
+      const result = await handleTunnelsTool('cloudflare_tunnel_token', {}, client);
+
+      expect(result.content[0].text).toContain('Error executing cloudflare_tunnel_token');
     });
   });
 

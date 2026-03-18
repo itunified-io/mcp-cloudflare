@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 This project uses [Calendar Versioning](https://calver.org/) (`YYYY.MM.DD.TS`).
 
 
+## v2026.03.18.1
+
+- **feat: `cloudflare_tunnel_token` tool** (#53)
+  - Retrieve the connector JWT token for a Cloudflare Tunnel
+  - Required for deploying cloudflared to K8s or Docker
+  - 7 tunnel tools total (was 6)
+  - 307 tests passing (was 305)
+
 ## v2026.03.17.4
 
 - **feat: DNSSEC write tools** (#96)
