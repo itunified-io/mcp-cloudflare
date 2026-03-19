@@ -396,28 +396,28 @@ export async function handleZerotrustTool(
       case "cloudflare_zt_delete_app": {
         const parsed = ZtDeleteAppSchema.parse(args);
         const accountId = requireAccountId(client);
-        await client.delete(
+        const result = await client.delete(
           `/accounts/${accountId}/access/apps/${parsed.app_id}`,
         );
-        return { content: [{ type: "text", text: `Access application ${parsed.app_id} deleted successfully.` }] };
+        return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
       }
 
       case "cloudflare_zt_delete_policy": {
         const parsed = ZtDeletePolicySchema.parse(args);
         const accountId = requireAccountId(client);
-        await client.delete(
+        const result = await client.delete(
           `/accounts/${accountId}/access/apps/${parsed.app_id}/policies/${parsed.policy_id}`,
         );
-        return { content: [{ type: "text", text: `Policy ${parsed.policy_id} deleted from app ${parsed.app_id} successfully.` }] };
+        return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
       }
 
       case "cloudflare_zt_delete_idp": {
         const parsed = ZtDeleteIdpSchema.parse(args);
         const accountId = requireAccountId(client);
-        await client.delete(
+        const result = await client.delete(
           `/accounts/${accountId}/access/identity_providers/${parsed.provider_id}`,
         );
-        return { content: [{ type: "text", text: `Identity provider ${parsed.provider_id} deleted successfully.` }] };
+        return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
       }
 
       default:

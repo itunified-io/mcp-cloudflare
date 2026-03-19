@@ -6,7 +6,7 @@ This project uses [Calendar Versioning](https://calver.org/) (`YYYY.MM.DD.TS`).
 
 ## v2026.03.19.1
 
-- **feat: Zero Trust delete tools** — complete CRUD lifecycle for ZT Access resources
+- **feat: Zero Trust delete tools** (#55) — complete CRUD lifecycle for ZT Access resources
   - `cloudflare_zt_delete_app` — delete ZT Access applications
   - `cloudflare_zt_delete_policy` — delete ZT Access policies
   - `cloudflare_zt_delete_idp` — delete ZT identity providers

@@ -419,7 +419,7 @@ describe('handleZerotrustTool', () => {
 
   describe('cloudflare_zt_delete_app', () => {
     it('deletes an Access app by ID', async () => {
-      const client = mockClient({ delete: vi.fn().mockResolvedValue({}) });
+      const client = mockClient({ delete: vi.fn().mockResolvedValue({ id: APP_ID }) });
 
       const result = await handleZerotrustTool(
         'cloudflare_zt_delete_app',
@@ -427,7 +427,7 @@ describe('handleZerotrustTool', () => {
         client,
       );
 
-      expect(result.content[0].text).toContain('deleted');
+      expect(result.content[0].text).toContain(APP_ID);
       expect(client.delete).toHaveBeenCalledWith(
         `/accounts/${ACCOUNT_ID}/access/apps/${APP_ID}`,
       );
@@ -442,7 +442,7 @@ describe('handleZerotrustTool', () => {
 
   describe('cloudflare_zt_delete_policy', () => {
     it('deletes a policy from an Access app', async () => {
-      const client = mockClient({ delete: vi.fn().mockResolvedValue({}) });
+      const client = mockClient({ delete: vi.fn().mockResolvedValue({ id: POLICY_ID }) });
 
       const result = await handleZerotrustTool(
         'cloudflare_zt_delete_policy',
@@ -450,7 +450,7 @@ describe('handleZerotrustTool', () => {
         client,
       );
 
-      expect(result.content[0].text).toContain('deleted');
+      expect(result.content[0].text).toContain(POLICY_ID);
       expect(client.delete).toHaveBeenCalledWith(
         `/accounts/${ACCOUNT_ID}/access/apps/${APP_ID}/policies/${POLICY_ID}`,
       );
@@ -469,7 +469,7 @@ describe('handleZerotrustTool', () => {
 
   describe('cloudflare_zt_delete_idp', () => {
     it('deletes an identity provider by ID', async () => {
-      const client = mockClient({ delete: vi.fn().mockResolvedValue({}) });
+      const client = mockClient({ delete: vi.fn().mockResolvedValue({ id: 'idp-uuid-123' }) });
 
       const result = await handleZerotrustTool(
         'cloudflare_zt_delete_idp',
@@ -477,7 +477,7 @@ describe('handleZerotrustTool', () => {
         client,
       );
 
-      expect(result.content[0].text).toContain('deleted');
+      expect(result.content[0].text).toContain('idp-uuid-123');
       expect(client.delete).toHaveBeenCalledWith(
         `/accounts/${ACCOUNT_ID}/access/identity_providers/idp-uuid-123`,
       );
