@@ -28,8 +28,8 @@ function mockClient(overrides: Partial<CloudflareClient> = {}): CloudflareClient
 // ---------------------------------------------------------------------------
 
 describe('Zero Trust Tool Definitions', () => {
-  it('exports 8 tool definitions', () => {
-    expect(zerotrustToolDefinitions).toHaveLength(8);
+  it('exports 11 tool definitions', () => {
+    expect(zerotrustToolDefinitions).toHaveLength(11);
   });
 
   it('all tools have cloudflare_zt_ prefix', () => {
@@ -414,6 +414,79 @@ describe('handleZerotrustTool', () => {
       expect(client.get).toHaveBeenCalledWith(
         `/accounts/${ACCOUNT_ID}/gateway/configuration`,
       );
+    });
+  });
+
+  describe('cloudflare_zt_delete_app', () => {
+    it('deletes an Access app by ID', async () => {
+      const client = mockClient({ delete: vi.fn().mockResolvedValue({}) });
+
+      const result = await handleZerotrustTool(
+        'cloudflare_zt_delete_app',
+        { app_id: APP_ID },
+        client,
+      );
+
+      expect(result.content[0].text).toContain('deleted');
+      expect(client.delete).toHaveBeenCalledWith(
+        `/accounts/${ACCOUNT_ID}/access/apps/${APP_ID}`,
+      );
+    });
+
+    it('requires app_id parameter', async () => {
+      const client = mockClient();
+      const result = await handleZerotrustTool('cloudflare_zt_delete_app', {}, client);
+      expect(result.content[0].text).toContain('Error executing cloudflare_zt_delete_app');
+    });
+  });
+
+  describe('cloudflare_zt_delete_policy', () => {
+    it('deletes a policy from an Access app', async () => {
+      const client = mockClient({ delete: vi.fn().mockResolvedValue({}) });
+
+      const result = await handleZerotrustTool(
+        'cloudflare_zt_delete_policy',
+        { app_id: APP_ID, policy_id: POLICY_ID },
+        client,
+      );
+
+      expect(result.content[0].text).toContain('deleted');
+      expect(client.delete).toHaveBeenCalledWith(
+        `/accounts/${ACCOUNT_ID}/access/apps/${APP_ID}/policies/${POLICY_ID}`,
+      );
+    });
+
+    it('requires both app_id and policy_id', async () => {
+      const client = mockClient();
+      const result = await handleZerotrustTool(
+        'cloudflare_zt_delete_policy',
+        { app_id: APP_ID },
+        client,
+      );
+      expect(result.content[0].text).toContain('Error executing cloudflare_zt_delete_policy');
+    });
+  });
+
+  describe('cloudflare_zt_delete_idp', () => {
+    it('deletes an identity provider by ID', async () => {
+      const client = mockClient({ delete: vi.fn().mockResolvedValue({}) });
+
+      const result = await handleZerotrustTool(
+        'cloudflare_zt_delete_idp',
+        { provider_id: 'idp-uuid-123' },
+        client,
+      );
+
+      expect(result.content[0].text).toContain('deleted');
+      expect(client.delete).toHaveBeenCalledWith(
+        `/accounts/${ACCOUNT_ID}/access/identity_providers/idp-uuid-123`,
+      );
+    });
+
+    it('requires provider_id parameter', async () => {
+      const client = mockClient();
+      const result = await handleZerotrustTool('cloudflare_zt_delete_idp', {}, client);
+      expect(result.content[0].text).toContain('Error executing cloudflare_zt_delete_idp');
     });
   });
 

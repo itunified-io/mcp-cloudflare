@@ -69,6 +69,19 @@ const ZtCreateIdpSchema = z.object({
 
 const ZtGatewayStatusSchema = z.object({});
 
+const ZtDeleteAppSchema = z.object({
+  app_id: z.string().min(1, "App ID is required"),
+});
+
+const ZtDeletePolicySchema = z.object({
+  app_id: z.string().min(1, "App ID is required"),
+  policy_id: z.string().min(1, "Policy ID is required"),
+});
+
+const ZtDeleteIdpSchema = z.object({
+  provider_id: z.string().min(1, "Provider ID is required"),
+});
+
 // ---------------------------------------------------------------------------
 // Account ID helper
 // ---------------------------------------------------------------------------
@@ -233,6 +246,43 @@ export const zerotrustToolDefinitions = [
       properties: {},
     },
   },
+  {
+    name: "cloudflare_zt_delete_app",
+    description:
+      "DESTRUCTIVE: Delete a Zero Trust Access application. This removes the application and all its associated policies.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        app_id: { type: "string", description: "Access application ID (UUID) to delete" },
+      },
+      required: ["app_id"],
+    },
+  },
+  {
+    name: "cloudflare_zt_delete_policy",
+    description:
+      "DESTRUCTIVE: Delete an access policy from a Zero Trust Access application.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        app_id: { type: "string", description: "Access application ID (UUID)" },
+        policy_id: { type: "string", description: "Policy ID (UUID) to delete" },
+      },
+      required: ["app_id", "policy_id"],
+    },
+  },
+  {
+    name: "cloudflare_zt_delete_idp",
+    description:
+      "DESTRUCTIVE: Delete an identity provider (IdP) from Zero Trust Access.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        provider_id: { type: "string", description: "Identity provider ID (UUID) to delete" },
+      },
+      required: ["provider_id"],
+    },
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -341,6 +391,33 @@ export async function handleZerotrustTool(
         const accountId = requireAccountId(client);
         const result = await client.get(`/accounts/${accountId}/gateway/configuration`);
         return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
+      }
+
+      case "cloudflare_zt_delete_app": {
+        const parsed = ZtDeleteAppSchema.parse(args);
+        const accountId = requireAccountId(client);
+        await client.delete(
+          `/accounts/${accountId}/access/apps/${parsed.app_id}`,
+        );
+        return { content: [{ type: "text", text: `Access application ${parsed.app_id} deleted successfully.` }] };
+      }
+
+      case "cloudflare_zt_delete_policy": {
+        const parsed = ZtDeletePolicySchema.parse(args);
+        const accountId = requireAccountId(client);
+        await client.delete(
+          `/accounts/${accountId}/access/apps/${parsed.app_id}/policies/${parsed.policy_id}`,
+        );
+        return { content: [{ type: "text", text: `Policy ${parsed.policy_id} deleted from app ${parsed.app_id} successfully.` }] };
+      }
+
+      case "cloudflare_zt_delete_idp": {
+        const parsed = ZtDeleteIdpSchema.parse(args);
+        const accountId = requireAccountId(client);
+        await client.delete(
+          `/accounts/${accountId}/access/identity_providers/${parsed.provider_id}`,
+        );
+        return { content: [{ type: "text", text: `Identity provider ${parsed.provider_id} deleted successfully.` }] };
       }
 
       default:
