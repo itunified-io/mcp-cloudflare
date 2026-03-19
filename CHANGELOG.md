@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 This project uses [Calendar Versioning](https://calver.org/) (`YYYY.MM.DD.TS`).
 
 
+## v2026.03.19.1
+
+- **feat: Zero Trust delete tools** — complete CRUD lifecycle for ZT Access resources
+  - `cloudflare_zt_delete_app` — delete ZT Access applications
+  - `cloudflare_zt_delete_policy` — delete ZT Access policies
+  - `cloudflare_zt_delete_idp` — delete ZT identity providers
+  - 3 new tools (total: 75), 6 new tests, 313 tests passing
+
 ## v2026.03.18.1
 
 - **feat: `cloudflare_tunnel_token` tool** (#53)
