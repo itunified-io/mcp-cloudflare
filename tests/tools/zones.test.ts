@@ -26,13 +26,13 @@ function mockClient(overrides: Partial<CloudflareClient> = {}): CloudflareClient
 // ---------------------------------------------------------------------------
 
 describe('Zones Tool Definitions', () => {
-  it('exports 4 tool definitions', () => {
-    expect(zonesToolDefinitions).toHaveLength(4);
+  it('exports 5 tool definitions', () => {
+    expect(zonesToolDefinitions).toHaveLength(5);
   });
 
-  it('all tools have cloudflare_zone_ prefix', () => {
+  it('all tools have cloudflare_ prefix', () => {
     for (const tool of zonesToolDefinitions) {
-      expect(tool.name).toMatch(/^cloudflare_zone/);
+      expect(tool.name).toMatch(/^cloudflare_/);
     }
   });
 
@@ -181,6 +181,60 @@ describe('handleZonesTool', () => {
       );
 
       expect(result.content[0].text).toContain('Error executing cloudflare_zone_setting_update');
+    });
+  });
+
+  describe('cloudflare_cache_purge', () => {
+    it('purges specific files', async () => {
+      const mockResult = { id: ZONE_ID };
+      const client = mockClient({ post: vi.fn().mockResolvedValue(mockResult) });
+
+      const result = await handleZonesTool(
+        'cloudflare_cache_purge',
+        { zone_id: ZONE_ID, files: ['https://example.com/styles.css'] },
+        client,
+      );
+
+      expect(result.content[0].text).toContain(ZONE_ID);
+      expect(client.post).toHaveBeenCalledWith(
+        `/zones/${ZONE_ID}/purge_cache`,
+        { files: ['https://example.com/styles.css'] },
+      );
+    });
+
+    it('purges everything', async () => {
+      const client = mockClient({ post: vi.fn().mockResolvedValue({ id: ZONE_ID }) });
+
+      await handleZonesTool(
+        'cloudflare_cache_purge',
+        { zone_id: ZONE_ID, purge_everything: true },
+        client,
+      );
+
+      expect(client.post).toHaveBeenCalledWith(
+        `/zones/${ZONE_ID}/purge_cache`,
+        { purge_everything: true },
+      );
+    });
+
+    it('returns error when no purge target specified', async () => {
+      const client = mockClient();
+
+      const result = await handleZonesTool(
+        'cloudflare_cache_purge',
+        { zone_id: ZONE_ID },
+        client,
+      );
+
+      expect(result.content[0].text).toContain('Provide files, tags, prefixes, or purge_everything');
+    });
+
+    it('requires zone_id', async () => {
+      const client = mockClient();
+
+      const result = await handleZonesTool('cloudflare_cache_purge', {}, client);
+
+      expect(result.content[0].text).toContain('Error executing cloudflare_cache_purge');
     });
   });
 
