@@ -81,6 +81,7 @@ Create an API Token at `dash.cloudflare.com/profile/api-tokens` with the followi
 
 - **DNS**: Zone > DNS > Edit
 - **Zone settings**: Zone > Zone Settings > Edit
+- **Cache purge**: Zone > Cache Purge > Edit
 - **Tunnels**: Account > Cloudflare Tunnel > Edit
 - **WAF**: Zone > Firewall Services > Edit
 - **Zero Trust**: Account > Access: Apps and Policies > Edit

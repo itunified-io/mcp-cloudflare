@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 This project uses [Calendar Versioning](https://calver.org/) (`YYYY.MM.DD.TS`).
 
 
+## v2026.03.21.1
+
+- **feat: add cloudflare_cache_purge tool** (#57) — purge CF edge cache
+  - Purge specific URLs, cache tags, URL prefixes, or everything
+  - Zone-level tool in `src/tools/zones.ts`
+  - Requires `Cache Purge:Edit` API token permission
+  - 1 new tool (total: 76), 4 new tests, 317 tests passing
+
 ## v2026.03.19.1
 
 - **feat: Zero Trust delete tools** (#55) — complete CRUD lifecycle for ZT Access resources
