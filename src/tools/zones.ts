@@ -28,6 +28,14 @@ const ZoneSettingUpdateSchema = z.object({
   value: z.union([z.string(), z.number(), CoercedBooleanSchema, z.record(z.unknown()), z.array(z.unknown())]),
 });
 
+const CachePurgeSchema = z.object({
+  zone_id: ZoneNameOrIdSchema,
+  files: z.array(z.string()).optional(),
+  tags: z.array(z.string()).optional(),
+  prefixes: z.array(z.string()).optional(),
+  purge_everything: CoercedBooleanSchema.optional(),
+});
+
 // ---------------------------------------------------------------------------
 // Tool definitions (for ListTools)
 // ---------------------------------------------------------------------------
@@ -103,6 +111,41 @@ export const zonesToolDefinitions = [
       required: ["zone_id", "setting_name", "value"],
     },
   },
+  {
+    name: "cloudflare_cache_purge",
+    description:
+      "Purge cached files from Cloudflare's edge. Purge specific URLs (files), cache tags, URL prefixes, or everything. " +
+      "CAUTION: purge_everything causes a temporary origin load spike as the entire cache is rebuilt.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        zone_id: {
+          type: "string",
+          description: "Zone ID (32-char hex) or zone name (e.g., 'example.com')",
+        },
+        files: {
+          type: "array",
+          items: { type: "string" },
+          description: "Array of URLs to purge (e.g., ['https://example.com/styles.css'])",
+        },
+        tags: {
+          type: "array",
+          items: { type: "string" },
+          description: "Array of cache tags to purge (Enterprise only)",
+        },
+        prefixes: {
+          type: "array",
+          items: { type: "string" },
+          description: "Array of URL prefixes to purge (Enterprise only, e.g., ['example.com/assets/'])",
+        },
+        purge_everything: {
+          type: "boolean",
+          description: "Set to true to purge ALL cached content for the zone. Use with caution.",
+        },
+      },
+      required: ["zone_id"],
+    },
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -147,6 +190,27 @@ export async function handleZonesTool(
         const result = await client.patch(`/zones/${zoneId}/settings/${parsed.setting_name}`, {
           value: parsed.value,
         });
+        return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
+      }
+
+      case "cloudflare_cache_purge": {
+        const parsed = CachePurgeSchema.parse(args);
+        const zoneId = await client.resolveZoneId(parsed.zone_id);
+        const body: Record<string, unknown> = {};
+        if (parsed.purge_everything) {
+          body["purge_everything"] = true;
+        } else if (parsed.files?.length) {
+          body["files"] = parsed.files;
+        } else if (parsed.tags?.length) {
+          body["tags"] = parsed.tags;
+        } else if (parsed.prefixes?.length) {
+          body["prefixes"] = parsed.prefixes;
+        } else {
+          return {
+            content: [{ type: "text", text: "Error: Provide files, tags, prefixes, or purge_everything=true" }],
+          };
+        }
+        const result = await client.post(`/zones/${zoneId}/purge_cache`, body);
         return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
       }
 

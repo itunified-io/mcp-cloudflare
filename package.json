@@ -1,6 +1,6 @@
 {
   "name": "@itunified.io/mcp-cloudflare",
-  "version": "2026.3.17-4",
+  "version": "2026.3.21",
   "description": "Slim Cloudflare MCP Server — DNS, Zones, Tunnels, WAF, Zero Trust, Security management via Cloudflare API v4",
   "type": "module",
   "main": "dist/index.js",
@@ -13,14 +13,24 @@
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run build && npm test && node scripts/prepublish-check.js"
   },
-  "keywords": ["mcp", "cloudflare", "dns", "waf", "zero-trust", "tunnels", "model-context-protocol"],
+  "keywords": [
+    "mcp",
+    "cloudflare",
+    "dns",
+    "waf",
+    "zero-trust",
+    "tunnels",
+    "model-context-protocol"
+  ],
   "author": "itunified.io",
   "license": "AGPL-3.0-only",
   "repository": {
     "type": "git",
     "url": "https://github.com/itunified-io/mcp-cloudflare.git"
   },
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.24.0",
     "axios": "^1.7.0",
