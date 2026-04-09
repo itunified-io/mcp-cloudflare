@@ -5,7 +5,19 @@ import {
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
+import { loadFromVault } from './config/vault-loader.js';
 import { CloudflareClient } from './client/cloudflare-client.js';
+
+// Opportunistic Vault AppRole secret loading. Silent no-op unless
+// NAS_VAULT_ADDR + NAS_VAULT_ROLE_ID + NAS_VAULT_SECRET_ID are set.
+// Precedence: process.env (explicit) > Vault. See src/config/vault-loader.ts.
+await loadFromVault({
+  kvPath: 'cloudflare/api',
+  mapping: {
+    api_token: 'CLOUDFLARE_API_TOKEN',
+    account_id: 'CLOUDFLARE_ACCOUNT_ID',
+  },
+});
 import { zonesToolDefinitions, handleZonesTool } from './tools/zones.js';
 import { dnsToolDefinitions, handleDnsTool } from './tools/dns.js';
 import { diagnosticsToolDefinitions, handleDiagnosticsTool } from './tools/diagnostics.js';
@@ -62,7 +74,7 @@ for (const def of certificatesToolDefinitions) toolHandlers.set(def.name, handle
 for (const def of ratelimitingToolDefinitions) toolHandlers.set(def.name, handleRatelimitingTool);
 
 const server = new Server(
-  { name: 'mcp-cloudflare', version: '2026.3.16.11' },
+  { name: 'mcp-cloudflare', version: '2026.4.9-1' },
   { capabilities: { tools: {} } }
 );
 
