@@ -74,6 +74,41 @@ Add to `.mcp.json` in your project root:
 | `CLOUDFLARE_API_TOKEN` | Yes | — | Cloudflare API Token (with appropriate permissions) |
 | `CLOUDFLARE_ACCOUNT_ID` | No | — | Cloudflare Account ID (required for account-level operations) |
 | `CLOUDFLARE_TIMEOUT` | No | `30000` | Request timeout in milliseconds |
+| `NAS_VAULT_ADDR` | No | — | HashiCorp Vault URL, enables Vault AppRole loading (see below) |
+| `NAS_VAULT_ROLE_ID` | No | — | Vault AppRole role_id |
+| `NAS_VAULT_SECRET_ID` | No | — | Vault AppRole secret_id |
+| `NAS_VAULT_KV_MOUNT` | No | `kv` | Vault KV v2 mount path |
+
+### Loading Secrets from HashiCorp Vault (AppRole)
+
+If you run a central Vault instance, `mcp-cloudflare` can fetch its credentials
+at startup via AppRole instead of passing them through the MCP config:
+
+```sh
+export NAS_VAULT_ADDR=https://vault.example.com
+export NAS_VAULT_ROLE_ID=<role-id>
+export NAS_VAULT_SECRET_ID=<secret-id>
+# optional — defaults to "kv"
+export NAS_VAULT_KV_MOUNT=kv
+```
+
+The loader reads KV v2 at `<mount>/data/cloudflare/api` and expects two keys:
+`api_token` and `account_id`. Example Vault write:
+
+```sh
+vault kv put kv/cloudflare/api \
+  api_token=your-api-token-here \
+  account_id=00000000000000000000000000000000
+```
+
+**Precedence:** `process.env` (explicit) > Vault. If `NAS_VAULT_ADDR` is unset
+the loader is a silent no-op — the server behaves exactly as before. On any
+Vault error (network, auth, missing path), a single-line warning is written
+to stderr and the server falls back to whatever env vars are already set.
+
+**Security:** secret values are never logged. Only the KV path name and a
+populated-count appear in stderr diagnostics. Uses the global `fetch`
+(Node 20+) — no new runtime dependencies.
 
 ### API Token Permissions
 

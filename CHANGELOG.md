@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 This project uses [Calendar Versioning](https://calver.org/) (`YYYY.MM.DD.TS`).
 
 
+## v2026.04.09.1
+
+- **Vault AppRole secret loading** (#59)
+  - New opportunistic loader reads `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` from HashiCorp Vault at startup
+  - Configured via `NAS_VAULT_ADDR` + `NAS_VAULT_ROLE_ID` + `NAS_VAULT_SECRET_ID` (optional `NAS_VAULT_KV_MOUNT`, default `kv`)
+  - KV v2 path: `<mount>/data/cloudflare/api` — keys `api_token`, `account_id`
+  - Precedence: `process.env` (explicit) > Vault — fully backwards compatible (silent no-op if `NAS_VAULT_ADDR` is unset)
+  - Vault errors log a single stderr line and never fatal — the server falls back to existing env vars
+  - Secret values are never logged; only the KV path name and a populated-count appear in diagnostics
+  - No new runtime dependencies — uses global `fetch` (Node 20+)
+
 ## v2026.03.21.1
 
 - **feat: add cloudflare_cache_purge tool** (#57) — purge CF edge cache
