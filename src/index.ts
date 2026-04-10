@@ -74,7 +74,7 @@ for (const def of certificatesToolDefinitions) toolHandlers.set(def.name, handle
 for (const def of ratelimitingToolDefinitions) toolHandlers.set(def.name, handleRatelimitingTool);
 
 const server = new Server(
-  { name: 'mcp-cloudflare', version: '2026.4.9-1' },
+  { name: 'mcp-cloudflare', version: '2026.4.10-1' },
   { capabilities: { tools: {} } }
 );
 

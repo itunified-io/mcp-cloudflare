@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 This project uses [Calendar Versioning](https://calver.org/) (`YYYY.MM.DD.TS`).
 
 
+## v2026.04.10.1
+
+- **chore: MCP Registry listing** (#61)
+  - Add `server.json` manifest for registry.modelcontextprotocol.io
+  - Add `mcpName` field to `package.json` for registry validation
+  - Namespace: `io.github.itunified-io/cloudflare`
+  - Version bump to 2026.4.10-1
+
 ## v2026.04.09.1
 
 - **Vault AppRole secret loading** (#59)
