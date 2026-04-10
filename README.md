@@ -15,6 +15,7 @@ Slim Cloudflare MCP Server for managing DNS, zones, tunnels, WAF, Zero Trust, an
 
 - [Features](#features)
 - [Quick Start](#quick-start)
+- [HashiCorp Vault Integration (Optional)](#hashicorp-vault-integration-optional)
 - [Claude Code Integration](#claude-code-integration)
 - [Configuration](#configuration)
 - [Multi-Zone Support](#multi-zone-support)
@@ -47,6 +48,141 @@ cp .env.example .env   # Edit with your Cloudflare API token
 npm run build
 node dist/index.js     # stdio transport for MCP
 ```
+
+## HashiCorp Vault Integration (Optional)
+
+`mcp-cloudflare` supports loading Cloudflare credentials from a central
+[HashiCorp Vault](https://www.vaultproject.io/) instance at startup via AppRole
+authentication. This is optional — the server works fine with plain environment
+variables alone.
+
+### How It Works
+
+On startup, if `NAS_VAULT_ADDR` is set the server performs an AppRole login,
+fetches the KV v2 secret at `<mount>/data/cloudflare/api`, and injects the
+values into the process environment **before** the MCP transport starts. The
+loader is fully opportunistic:
+
+- If `NAS_VAULT_ADDR` is **unset**, the loader is a silent no-op. No Vault
+  calls are made and the server behaves exactly as before.
+- On any Vault error (network failure, bad credentials, missing secret path),
+  a single-line warning is written to stderr and the server falls back to
+  whatever environment variables are already set.
+- Secret values are **never logged**. Only the KV path name and a
+  populated-count appear in stderr diagnostics.
+- Uses the built-in `fetch` (Node 20+) — no additional runtime dependencies.
+
+### Credential Precedence
+
+```
+Explicit env vars (CLOUDFLARE_API_TOKEN etc.) > Vault > error (missing creds)
+```
+
+If you set `CLOUDFLARE_API_TOKEN` directly, the Vault loader will not
+overwrite it. Vault only fills in credentials that are not already present in
+the environment.
+
+### Vault Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `NAS_VAULT_ADDR` | Yes* | Vault server address (e.g., `https://vault.example.com:8200`) |
+| `NAS_VAULT_ROLE_ID` | Yes* | AppRole role ID for this server |
+| `NAS_VAULT_SECRET_ID` | Yes* | AppRole secret ID for this server |
+| `NAS_VAULT_KV_MOUNT` | No | KV v2 mount path (default: `kv`) |
+
+\* Only required if using Vault. All three must be set together.
+
+### KV v2 Secret Structure
+
+Write the Cloudflare credentials to the following path in Vault:
+
+```
+Path: kv/cloudflare/api
+```
+
+```json
+{
+  "api_token": "your-cloudflare-api-token",
+  "account_id": "your-account-id"
+}
+```
+
+Key mapping:
+
+| Vault key | Environment variable |
+|-----------|---------------------|
+| `api_token` | `CLOUDFLARE_API_TOKEN` |
+| `account_id` | `CLOUDFLARE_ACCOUNT_ID` |
+
+### Vault Setup Steps
+
+**1. Write credentials to KV v2:**
+
+```sh
+vault kv put kv/cloudflare/api \
+  api_token="your-cloudflare-api-token" \
+  account_id="your-account-id"
+```
+
+**2. Create a Vault policy:**
+
+```hcl
+# cloudflare-mcp-policy.hcl
+path "kv/data/cloudflare/api" {
+  capabilities = ["read"]
+}
+```
+
+```sh
+vault policy write cloudflare-mcp cloudflare-mcp-policy.hcl
+```
+
+**3. Enable AppRole auth and create a role:**
+
+```sh
+vault auth enable approle
+
+vault write auth/approle/role/cloudflare-mcp \
+  token_policies="cloudflare-mcp" \
+  token_ttl="1h" \
+  token_max_ttl="4h" \
+  secret_id_ttl="0"   # 0 = no expiry; set a duration for rotation
+```
+
+**4. Retrieve the role ID and secret ID:**
+
+```sh
+vault read auth/approle/role/cloudflare-mcp/role-id
+vault write -f auth/approle/role/cloudflare-mcp/secret-id
+```
+
+### Claude Desktop / MCP Config Example (with Vault)
+
+When using Vault, no Cloudflare credentials are needed in the MCP config —
+only the three Vault variables:
+
+```json
+{
+  "mcpServers": {
+    "cloudflare": {
+      "command": "npx",
+      "args": ["@itunified.io/mcp-cloudflare"],
+      "env": {
+        "NAS_VAULT_ADDR": "https://vault.example.com:8200",
+        "NAS_VAULT_ROLE_ID": "your-role-id",
+        "NAS_VAULT_SECRET_ID": "your-secret-id"
+      }
+    }
+  }
+}
+```
+
+`NAS_VAULT_KV_MOUNT` can be omitted if your KV engine is mounted at the
+default path `kv`. The Cloudflare API token and account ID will be fetched
+automatically at startup.
+
+---
 
 ## Claude Code Integration
 
